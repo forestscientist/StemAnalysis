@@ -1,26 +1,54 @@
-#' Reconstructing tree growth and carbon accumulation with stem analysis data
+#' Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
 #'
-#' @param xtree Xtree is the tree number (Treeno), which isused to choose the
+#' @param xtree Xtree is the tree number (Treeno), which is used to choose the
 #'     target tree to be analyzed
 #' @param stemgrowth If stemgrowth is 'TRUE', stem growth profile and growth
 #'     trends in terms of diameter at breast height (DBH), tree height, and
 #'     stem volume will be showed in a graph
 #' @param treecarbon If treecarbon is 'TRUE', total tree biomass and carbon
-#'     storage will be estimated by allometric models and volume model. In
-#'     addition, although treecarbon is 'TRUE', the estimation of tree biomass
-#'     and carbon storage by allometric models will skip if data 'parameterdata'
-#'     is missing, and the same is true for the estimation by volume model if
-#'     data 'BEFdata' is missing
+#'     storage will be estimated by allometric models (Xiang et al., 2021) and
+#'     volume model (IPCC, 2003). In addition, although treecarbon is 'TRUE',
+#'     the estimation of tree biomass and carbon storage by allometric models
+#'     will skip if data 'parameterdata' is missing, and the same is true for
+#'     the estimation by volume model if data 'BEFdata' is missing
 #' @param HDmodel If HDmodel is 'TRUE', height-diameter relationship will be
-#'     fitted with nonlinear models and showed the fitted results in a graph
+#'     fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted
+#'     results in a graph
 #' @param stemdata Stemdata is the stem analysis data that has been inputted
 #' @param parameterdata Parameterdata is the parameter data of allometric
 #'     models that can be optionally inputted
 #' @param BEFdata BEFdata is the biomass estimation factor data of volume model
 #'     that can be optionally inputted by users
 #'
-#' @return NULL
+#' @return A list with class "output" containing the following components:
+#'    - `StemGrowth`: the estimated stem growth trends data, including the tree
+#'                    age chronosequence and the corresponding growth data of
+#'                    diameter at breast height (DBH), stem height, and stem
+#'                    volume
+#'    - `allomCarbon`: the estimated tree biomass and carbon storage data by
+#'                     using allometric models, including tree biomass and
+#'                     carbon storage for each tissues (stem, branch, leaf,
+#'                     root, and total tree)
+#'    - `volumeCarbon`: the estimated tree biomass and carbon storage data by
+#'                     using volume model, including tree biomass and
+#'                     carbon storage for each tissues (stem, branch, leaf,
+#'                     root, and total tree)
 #' @export
+#'
+#' @references Fang, J., Chen, A., Peng, C., et al. (2001)
+#' Changes in forest biomass carbon storage in China between 1949 and 1998.
+#' \emph{Science}
+#' \bold{292}, 2320-2322. {doi:10.1126/science.1058629}
+#'
+#' Mehtatalo, L. (2017)
+#' Lmfor: Functions for forest biometrics.
+#' {https://CRAN.R-project.org/package=lmfor}
+#'
+#' Xiang, W.H., Li, L.H., Ouyang, S., et al. (2021)
+#' Effects of stand age on tree biomass partitioning and allometric equations
+#'     in Chinese fir (Cunninghamia lanceolata) plantations.
+#' \emph{European Journal of Forest Research}
+#' \bold{140}, 317-332. {doi:10.1007/s10342-020-01333-0}
 #'
 #' @examples
 #'
@@ -45,13 +73,19 @@
 
 
 stemanalysism <- function(xtree, stemgrowth = FALSE,
-                          treecarbon = FALSE, HDmodel = FALSE, stemdata,
-                          parameterdata, BEFdata) {
-  Treeno <- NULL
+                          treecarbon = FALSE, HDmodel = FALSE,
+                          stemdata, parameterdata, BEFdata) {
+  Treeno <- output <- NULL
+
+  # list estimation data
+  output <- list()
+
+  ## To maintain user's original options
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
 
   # Extract data of a given tree by selecting the appropriate Treeno
   stemdata1 <- subset(stemdata, Treeno == xtree)
-
 
 
   # Check if there is enough data to compute the stem analysis
@@ -270,16 +304,120 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   AnincreV <- c(0, AnincreV1)
 
   # Construct data frame containing DBH, height, and volume and growth data
-  StemGrowth <- data.frame(Mydata, AnincreD, AvincreD,
-                        AnincreH, AvincreH, AnincreV, AvincreV)
-  write.table(StemGrowth, file ="../StemGrowth.csv", sep =",")
+  output$StemGrowth <- data.frame(Mydata, AnincreD, AvincreD,
+                           AnincreH, AvincreH, AnincreV, AvincreV)
+
+
+
+
+  # Estimation of tree biomass and carbon storage
+
+  # Check if there a parameterdata exists
+  if(!missing(parameterdata)){
+
+    # Calculate tree biomass using allometric models
+    stem_pa <- subset(parameterdata,parameterdata$tissues=="stem")
+    stem_biomass <- ifelse(DBH!=0,
+                           exp(stem_pa$a+stem_pa$b*log(DBH^2*Height)), DBH)
+    stem_biomass <- as.numeric(stem_biomass)
+
+    branch_pa <- subset(parameterdata,parameterdata$tissues=="branch")
+    branch_biomass <- ifelse(DBH!=0,
+                             exp(branch_pa$a+branch_pa$b*log(DBH^2*Height)),
+                             DBH)
+    branch_biomass <- as.numeric(branch_biomass)
+
+    leaf_pa <- subset(parameterdata,parameterdata$tissues=="leaf")
+    leaf_biomass <- ifelse(DBH!=0,
+                           exp(leaf_pa$a+leaf_pa$b*log(DBH^2*Height)), DBH)
+    leaf_biomass <- as.numeric(leaf_biomass)
+
+    root_pa <- subset(parameterdata,parameterdata$tissues=="root")
+    root_biomass <- ifelse(DBH!=0,
+                           exp(root_pa$a+root_pa$b*log(DBH^2*Height)), DBH)
+    root_biomass <- as.numeric(root_biomass)
+
+    total_pa <- subset(parameterdata,parameterdata$tissues=="total")
+    total_biomass <- stem_biomass+branch_biomass+root_biomass+leaf_biomass
+    total_biomass <- as.numeric(total_biomass)
+
+    # Calculate tree carbon storage
+    stem_C <-  stem_biomass*stem_pa$Cconcentration
+    stem_C <- as.numeric(stem_C)
+
+    branch_C <- branch_biomass*branch_pa$Cconcentration
+    branch_C <- as.numeric(branch_C)
+
+    leaf_C <- leaf_biomass*leaf_pa$Cconcentration
+    leaf_C <- as.numeric(leaf_C)
+
+    root_C <- root_biomass*root_pa$Cconcentration
+    root_C <- as.numeric(root_C)
+
+    total_C <- total_biomass*total_pa$Cconcentration
+    total_C <- as.numeric(total_C)
+
+    # Construct data frame that contains tree biomass and carbon storage
+    stemdj <- as.numeric(stemdj)
+    allomCarbon <- cbind(stemdj, stem_biomass, branch_biomass, leaf_biomass,
+                         root_biomass, total_biomass, stem_C, branch_C,
+                         leaf_C, root_C, total_C)
+    output$allomCarbon <- as.data.frame(allomCarbon)
+
+  }
+
+  # Check if there a BEFdata exists
+  if(!missing(BEFdata)){
+
+    # Calculate tree biomass using volume model
+    stem_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*1000,Volume)
+    stem_bio <- as.numeric(stem_bio)
+
+    aboveground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*1000,Volume)
+    aboveground_bio <- as.numeric(aboveground_bio)
+
+    belowground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*BEFdata$R*1000,Volume)
+    belowground_bio <- as.numeric(belowground_bio)
+
+    total_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*(1+BEFdata$R)*1000,Volume)
+    total_bio <- as.numeric(total_bio)
+
+    # Calculate tree carbon storage
+    stem_Carbon <-  stem_bio*BEFdata$Cconcentration
+    stem_Carbon <- as.numeric(stem_Carbon)
+
+    aboveground_Carbon <- aboveground_bio*BEFdata$Cconcentration
+    aboveground_Carbon <- as.numeric(aboveground_Carbon)
+
+    belowground_Carbon <- belowground_bio*BEFdata$Cconcentration
+    belowground_Carbon <- as.numeric(belowground_Carbon)
+
+    total_Carbon <- total_bio*BEFdata$Cconcentration
+    total_Carbon <- as.numeric(total_Carbon)
+
+
+    # Construct data frame that contains tree biomass and tree carbon storage
+    stemdj <- as.numeric(stemdj)
+
+    volumeCarbon <- cbind(stemdj, stem_bio, aboveground_bio,
+                          belowground_bio, total_bio, stem_Carbon,
+                          aboveground_Carbon, belowground_Carbon,
+                          total_Carbon)
+    output$volumeCarbon <- as.data.frame(volumeCarbon)
+
+  }
+
+
 
   #######################################################
   # define drawStemgrowth() function which show the stem growth trend
   drawStemgrowth <- function() {
+
+
     # Open a new graph frame which names as “Stem growth trend”
     dev.new(title = "Stem growth trend", width = 4500,
             height = 4500, noRStudioGD = TRUE)
+
 
     # Define the parameters of the graph
     mat <- matrix(c(1, 1, 1, 2, 3, 4, 5, 6, 7), 3, 3, byrow = FALSE)
@@ -357,39 +495,39 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     }
 
     # Draw graphics for the cumulative growth
-    with(StemGrowth, plot(stemdj, DBHt, type = "b", pch = 16,
-                       col = "forestgreen", lwd = 2, cex = 1.5,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * max(DBHt)), xlab = "Age (years)",
-                       ylab = "DBH (cm)", las = 1, cex.lab = 1.1))
+    with(output$StemGrowth, plot(stemdj, DBHt, type = "b", pch = 16,
+                          col = "forestgreen", lwd = 2, cex = 1.5,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * max(DBHt)), xlab = "Age (years)",
+                          ylab = "DBH (cm)", las = 1, cex.lab = 1.1))
     legend("topleft", "(b)", cex = 1.1, box.lty = 0)
 
-    with(StemGrowth, plot(stemdj, Height, type = "b", pch = 16,
-                       col = "forestgreen", lwd = 2, cex = 1.5,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * max(Height)), xlab = "Age (years)",
-                       ylab = "Height (m)", las = 1, cex.lab = 1.1))
+    with(output$StemGrowth, plot(stemdj, Height, type = "b", pch = 16,
+                          col = "forestgreen", lwd = 2, cex = 1.5,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * max(Height)), xlab = "Age (years)",
+                          ylab = "Height (m)", las = 1, cex.lab = 1.1))
     legend("topleft", "(c)", cex = 1.1, box.lty = 0)
 
-    with(StemGrowth, plot(stemdj, Volume, type = "b", pch = 16,
-                       col = "forestgreen", lwd = 2, cex = 1.5,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * max(Volume)), xlab = "Age (years)",
-                       ylab = expression(paste("Volume (m"^"3", ")")),
-                       las = 1, cex.lab = 1.1))
+    with(output$StemGrowth, plot(stemdj, Volume, type = "b", pch = 16,
+                          col = "forestgreen", lwd = 2, cex = 1.5,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * max(Volume)), xlab = "Age (years)",
+                          ylab = expression(paste("Volume (m"^"3", ")")),
+                          las = 1, cex.lab = 1.1))
     legend("topleft", "(d)", cex = 1.1, box.lty = 0)
 
     # Draw graphics for the mean annual increment and current annual increment
-    with(StemGrowth, plot(stemdj, AnincreD, type = "l", lty = "dashed", pch = 16,
-                       col = "blue", lwd = 2, cex = 1.2,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * (max(max(AnincreD), max(AvincreD)))),
-                       xlab = "Age (years)",
-                       ylab = expression(paste
-                                  ("DBH increment (cm", " year"^"-1", ")")),
-                       las = 1, cex.lab = 1.1))
-    with(StemGrowth, lines(stemdj, AvincreD, lty = "dotted", pch = 16,
-                        col = "red", lwd = 2, cex = 1.2))
+    with(output$StemGrowth, plot(stemdj, AnincreD, type = "l", lty = "dashed", pch = 16,
+                          col = "blue", lwd = 2, cex = 1.2,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * (max(max(AnincreD), max(AvincreD)))),
+                          xlab = "Age (years)",
+                          ylab = expression(paste
+                                            ("DBH increment (cm", " year"^"-1", ")")),
+                          las = 1, cex.lab = 1.1))
+    with(output$StemGrowth, lines(stemdj, AvincreD, lty = "dotted", pch = 16,
+                           col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(e)", cex = 1.1, box.lty = 0)
     legend("topright",
            col = c("blue", "red"), cex = 1, box.lty = 0, lwd = 2,
@@ -397,36 +535,34 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
            c("Current annual increment", "Mean annual increment")
     )
 
-    with(StemGrowth, plot(stemdj, AnincreH, type = "l", lty = "dashed", pch = 1,
-                       col = "blue", lwd = 2, cex = 1.2,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * (max(max(AnincreH), max(AvincreH)))),
-                       xlab = "Age (years)",
-                       ylab = expression(paste
-                                  ("Height increment (m", " year"^"-1", ")")),
-                       las = 1, cex.lab = 1.1))
-    with(StemGrowth, lines(stemdj, AvincreH, lty = "dotted", pch = 16,
-                        col = "red", lwd = 2, cex = 1.2))
+    with(output$StemGrowth, plot(stemdj, AnincreH, type = "l", lty = "dashed", pch = 1,
+                          col = "blue", lwd = 2, cex = 1.2,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * (max(max(AnincreH), max(AvincreH)))),
+                          xlab = "Age (years)",
+                          ylab = expression(paste
+                                            ("Height increment (m", " year"^"-1", ")")),
+                          las = 1, cex.lab = 1.1))
+    with(output$StemGrowth, lines(stemdj, AvincreH, lty = "dotted", pch = 16,
+                           col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(f)", cex = 1.1, box.lty = 0)
 
-    with(StemGrowth, plot(stemdj, AnincreV, type = "l", lty = "dashed", pch = 1,
-                       col = "blue", lwd = 2, cex = 1.2,
-                       xlim = c(0, max(stemdj) + Ageclass),
-                       ylim = c(0, 1.2 * (max(max(AnincreV), max(AvincreV)))),
-                       xlab = "Age (years)",
-                       ylab = expression(paste
-                                ("Volume increment (m"^"3", " year"^"-1", ")"),
-                                         las = 1, cex.lab = 1.1)))
-    with(StemGrowth, lines(stemdj, AvincreV, lty = "dotted", pch = 16,
-                        col = "red", lwd = 2, cex = 1.2))
+    with(output$StemGrowth, plot(stemdj, AnincreV, type = "l", lty = "dashed", pch = 1,
+                          col = "blue", lwd = 2, cex = 1.2,
+                          xlim = c(0, max(stemdj) + Ageclass),
+                          ylim = c(0, 1.2 * (max(max(AnincreV), max(AvincreV)))),
+                          xlab = "Age (years)",
+                          ylab = expression(paste
+                                            ("Volume increment (m"^"3", " year"^"-1", ")"),
+                                            las = 1, cex.lab = 1.1)))
+    with(output$StemGrowth, lines(stemdj, AvincreV, lty = "dotted", pch = 16,
+                           col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(g)", cex = 1.1, box.lty = 0)
   }
 
   # Whether to call the stemgrowth graph
   if (stemgrowth == TRUE) {
     drawStemgrowth()
-  } else {
-    print("The user does not call the stemgrowth graph")
   }
 
 
@@ -436,67 +572,16 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   calCarbon <- function(parameterdata, BEFdata){
 
     # Check if there a parameterdata exists
-    # Estimation of tree biomass and carbon storage from allometric models
     if(!missing(parameterdata)){
 
-      # Calculate tree biomass using allometric models
-      stem_pa <- subset(parameterdata,parameterdata$tissues=="stem")
-      stem_biomass <- ifelse(DBH!=0,
-                             exp(stem_pa$a+stem_pa$b*log(DBH^2*Height)), DBH)
-      stem_biomass <- as.numeric(stem_biomass)
-
-      branch_pa <- subset(parameterdata,parameterdata$tissues=="branch")
-      branch_biomass <- ifelse(DBH!=0,
-                               exp(branch_pa$a+branch_pa$b*log(DBH^2*Height)),
-                               DBH)
-      branch_biomass <- as.numeric(branch_biomass)
-
-      leaf_pa <- subset(parameterdata,parameterdata$tissues=="leaf")
-      leaf_biomass <- ifelse(DBH!=0,
-                             exp(leaf_pa$a+leaf_pa$b*log(DBH^2*Height)), DBH)
-      leaf_biomass <- as.numeric(leaf_biomass)
-
-      root_pa <- subset(parameterdata,parameterdata$tissues=="root")
-      root_biomass <- ifelse(DBH!=0,
-                             exp(root_pa$a+root_pa$b*log(DBH^2*Height)), DBH)
-      root_biomass <- as.numeric(root_biomass)
-
-      total_pa <- subset(parameterdata,parameterdata$tissues=="total")
-      total_biomass <- stem_biomass+branch_biomass+root_biomass+leaf_biomass
-      total_biomass <- as.numeric(total_biomass)
-
-      # Calculate tree carbon storage
-      stem_C <-  stem_biomass*stem_pa$Cconcentration
-      stem_C <- as.numeric(stem_C)
-
-      branch_C <- branch_biomass*branch_pa$Cconcentration
-      branch_C <- as.numeric(branch_C)
-
-      leaf_C <- leaf_biomass*leaf_pa$Cconcentration
-      leaf_C <- as.numeric(leaf_C)
-
-      root_C <- root_biomass*root_pa$Cconcentration
-      root_C <- as.numeric(root_C)
-
-      total_C <- total_biomass*total_pa$Cconcentration
-      total_C <- as.numeric(total_C)
-
-      # Construct data frame that contains tree biomass and tree carbon storage
-      stemdj <- as.numeric(stemdj)
-      allomCarbon <- cbind(stemdj, stem_biomass, branch_biomass, leaf_biomass,
-                           root_biomass, total_biomass, stem_C, branch_C,
-                           leaf_C, root_C, total_C)
-      allomCarbon <- as.data.frame(allomCarbon)
-
-      write.table(allomCarbon, file ="../allomCarbon.csv", sep =",")
-
       # Combined tree growth trend data and carbon storage data
-      Mydata2 <- data.frame(StemGrowth, allomCarbon)
+      Mydata2 <- data.frame(output$StemGrowth, output$allomCarbon)
 
       # Open a new graph frame
       dev.new(title =
                 "tree biomass and carbon storage estimated by allometric models",
               width = 4500, height = 2250, noRStudioGD = TRUE)
+
 
       # Define the parameters of graph
       mat <- matrix(c(1,2),1,2,byrow=FALSE)
@@ -530,51 +615,11 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     }
 
 
-
     # Check if there a BEFdata exists
     if(!missing(BEFdata)){
 
-      # Calculate tree biomass using volume model
-      stem_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*1000,Volume)
-      stem_bio <- as.numeric(stem_bio)
-
-      aboveground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*1000,Volume)
-      aboveground_bio <- as.numeric(aboveground_bio)
-
-      belowground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*BEFdata$R*1000,Volume)
-      belowground_bio <- as.numeric(belowground_bio)
-
-      total_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*(1+BEFdata$R)*1000,Volume)
-      total_bio <- as.numeric(total_bio)
-
-      # Calculate tree carbon storage
-      stem_Carbon <-  stem_bio*BEFdata$Cconcentration
-      stem_Carbon <- as.numeric(stem_Carbon)
-
-      aboveground_Carbon <- aboveground_bio*BEFdata$Cconcentration
-      aboveground_Carbon <- as.numeric(aboveground_Carbon)
-
-      belowground_Carbon <- belowground_bio*BEFdata$Cconcentration
-      belowground_Carbon <- as.numeric(belowground_Carbon)
-
-      total_Carbon <- total_bio*BEFdata$Cconcentration
-      total_Carbon <- as.numeric(total_Carbon)
-
-
-      # Construct data frame that contains tree biomass and tree carbon storage
-      stemdj <- as.numeric(stemdj)
-
-      volumeCarbon <- cbind(stemdj, stem_bio, aboveground_bio,
-                            belowground_bio, total_bio, stem_Carbon,
-                            aboveground_Carbon, belowground_Carbon,
-                            total_Carbon)
-      volumeCarbon <- as.data.frame(volumeCarbon)
-
-      write.table(volumeCarbon, file ="../volumeCarbon.csv", sep =",")
-
       # Combined tree growth trend data and carbon storage data
-      Mydata3 <- data.frame(StemGrowth, volumeCarbon)
-
+      Mydata3 <- data.frame(output$StemGrowth, output$volumeCarbon)
 
       # Open a new graph frame
       dev.new(title =
@@ -616,8 +661,6 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   # Whether to call the treecarbon graph
   if (treecarbon == TRUE) {
     calCarbon(parameterdata, BEFdata)
-  } else {
-    print("The user does not call the treecarbon graph")
   }
 
 
@@ -638,7 +681,7 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     par(oma = c(0, 0, 0, 0), mar = c(5, 5, 1, 1))
 
     # Extract sub-datasets with tree height greater than 1.3 m
-    Mydata <- subset(StemGrowth, StemGrowth$Height >= 1.3)
+    Mydata <- subset(output$StemGrowth, Height >= 1.3)
 
     # Draw a scatter plot
     plot(Mydata$DBHt, Mydata$Height,
@@ -858,7 +901,7 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   # Whether to call the HDmodel graph
   if (HDmodel == TRUE) {
     allomHD()
-  } else {
-    print("The user does not call the HDmodel graph")
   }
+
+  return(output)
 }

@@ -1,16 +1,18 @@
 Package: StemAnalysis
 Type: Package
-Title: Reconstructing tree growth and carbon accumulation with stem analysis data
+Title: Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
 Version: 0.1.0
-Author: Wenhua Xiang, Huili Wu
+Author@R: c(person("Huili", "Wu", role = c("aut", "cre"), email = "wuhuili0701@163.com"), person("Wenhua", "Xiang", role = "aut"))
+Author: Huili Wu [aut, cre], Wenhua Xiang [aut]
 Maintainer: Huili Wu <wuhuili0701@163.com>
-Description: This package performs a number of standard tasks on input stem analysis data.
+Description: Use stem analysis data to reconstructing tree growth and carbon accumulation. Users can independently or in combination perform a number of standard tasks for any tree species.
     (i) Age class determination.
-    (ii) The cumulative growth, mean annual increment, and current annual increment of DBH with bark, tree height, and stem volume with bark are estimated. 
+    (ii) The cumulative growth, mean annual increment, and current annual increment of diameter at breast height (DBH) with bark, tree height, and stem volume with bark are estimated. 
     (iii) Tree biomass and carbon storage estimation from volume and allometric models are calculated. 
-    (iv) Height-diameter relationship is fitted with nonlinear models, if DBH or tree height are available, which can be used to retrieve tree height and DBH. 
-    These tasks can be performed independently or in combination, and result in output tables and graphics. This package is easily applied to stem analysis for any tree species.
+    (iv) Height-diameter relationship is fitted with nonlinear models, if diameter at breast height (DBH) or tree height are available, which can be used to retrieve tree height and diameter at breast height (DBH). 
 License: MIT + file LICENSE
+NeedsCompilation: no
+Repository: GitHub
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1

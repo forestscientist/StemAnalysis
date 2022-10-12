@@ -13,7 +13,7 @@ vignette: >
 StemAnalysis R package is a tool for designed to reconstruct stem growth profiles, construct height-diameter relationships, and consequently to compute growth trends in terms of diameter at breast height (DBH), tree height, stem volume, tree biomass and carbon. This vignette provides an overview of this package functions and options. We provide a working examples that demonstrates the basic functionality and use of the package.
 
 # Purpose
-Accurate information about age dynamics of timber production and carbon storage in forest ecosystems is frequently required by scientists, stakeholders, and policymakers. Stem analysis is a technique for measuring tree growth (Salas-Eljatib, 2021). The computational burden of reconstructing temporal, radial, and longitudinal patterns of tree growth, fitting diameter-height relationships, and calculating diameter with bark from radial annual-ring increment sequences measured on multiple cross-sectional discs, may present a hindrance to application of stem analysis methodology in forest research investigations and operational forest multifunctional management (Newton, 2019). Therefore, a standardized tool, StemAnalysis R package, is developed to calculate tree growth dynamics and then make the stem analysis technique more conveniently applied to forest multifunctional investigation.
+Accurate information about age dynamics of timber production and carbon storage in forest ecosystems is frequently required by scientists, stakeholders, and policymakers. Stem analysis is a technique for measuring tree growth (Salas-Eljatib, 2021). The computational burden of reconstructing temporal, radial, and longitudinal patterns of tree growth, fitting height-diameter relationships, and calculating diameter with bark from radial annual-ring increment sequences measured on multiple cross-sectional discs, may present a hindrance to application of stem analysis methodology in forest research investigations and operational forest multifunctional management (Newton, 2019). Therefore, a standardized tool, StemAnalysis R package, is developed to calculate tree growth dynamics and then make the stem analysis technique more conveniently applied to forest multifunctional investigation.
 
 
 ```{r, setup, include=FALSE}
@@ -33,7 +33,7 @@ install.packages("StemAnalysis")
 
 ```{r, eval=FALSE}
 require(StemAnalysis)
-require(knitr) # To input figures in this document
+require(knitr) # To input tables in this document
 ```
 
 # Load the stem analysis data stored in the package
@@ -65,8 +65,9 @@ str(BEFdata)
 ## 1. Stem growth analysis
 Reconstructed stem growth patterns and calculated DBH and tree height growth trends, and stem volume with bark increment trends using stem analysis data.   
 
-```{r, eval=FALSE, cache=TRUE}
+```{r, eval=TRUE, cache=TRUE}
 stemgrowth <- stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = stemdata)
+knitr::kable(stemgrowth)
 ```
 
 ```{r, echo=FALSE, out.width="120%"}
@@ -76,8 +77,9 @@ knitr::include_graphics("../man/Figures/StemGrowth.png")
 ## 2. Estimation Of tree carbon accumulation
 If set 'treecarbon = TRUE' and provide parameter data, tree biomass and carbon accumulation estimated by allometric models.
 
-```{r, eval=FALSE, cache=TRUE}
-stemgrowth <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata, parameterdata = parameterdata)
+```{r, eval=TRUE, cache=TRUE}
+allomcarbon <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata, parameterdata = parameterdata)
+knitr::kable(allomcarbon)
 ```
 
 ```{r, echo=FALSE}
@@ -86,8 +88,9 @@ knitr::include_graphics("../man/Figures/TreeCarbon_allometric.png")
 
 If set 'treecarbon = TRUE' and provide biomass expansion factor data, tree biomass and carbon accumulation estimated by volume model.
 
-```{r, eval=FALSE, cache=TRUE}
-stemgrowth <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata, BEFdata = BEFdata)
+```{r, eval=TRUE, cache=TRUE}
+volumecarbon <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata, BEFdata = BEFdata)
+knitr::kable(volumecarbon)
 ```
 
 ```{r, echo=FALSE}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/stemanalysis.R
 \name{stemanalysism}
 \alias{stemanalysism}
-\title{Reconstructing tree growth and carbon accumulation with stem analysis data}
+\title{Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data}
 \usage{
 stemanalysism(
   xtree,
@@ -15,7 +15,7 @@ stemanalysism(
 )
 }
 \arguments{
-\item{xtree}{Xtree is the tree number (Treeno), which isused to choose the
+\item{xtree}{Xtree is the tree number (Treeno), which is used to choose the
 target tree to be analyzed}
 
 \item{stemgrowth}{If stemgrowth is 'TRUE', stem growth profile and growth
@@ -23,14 +23,15 @@ trends in terms of diameter at breast height (DBH), tree height, and
 stem volume will be showed in a graph}
 
 \item{treecarbon}{If treecarbon is 'TRUE', total tree biomass and carbon
-storage will be estimated by allometric models and volume model. In
-addition, although treecarbon is 'TRUE', the estimation of tree biomass
-and carbon storage by allometric models will skip if data 'parameterdata'
-is missing, and the same is true for the estimation by volume model if
-data 'BEFdata' is missing}
+storage will be estimated by allometric models (Xiang et al., 2021) and
+volume model (IPCC, 2003). In addition, although treecarbon is 'TRUE',
+the estimation of tree biomass and carbon storage by allometric models
+will skip if data 'parameterdata' is missing, and the same is true for
+the estimation by volume model if data 'BEFdata' is missing}
 
 \item{HDmodel}{If HDmodel is 'TRUE', height-diameter relationship will be
-fitted with nonlinear models and showed the fitted results in a graph}
+fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted
+results in a graph}
 
 \item{stemdata}{Stemdata is the stem analysis data that has been inputted}
 
@@ -40,8 +41,23 @@ models that can be optionally inputted}
 \item{BEFdata}{BEFdata is the biomass estimation factor data of volume model
 that can be optionally inputted by users}
 }
+\value{
+A list with class "output" containing the following components:
+   - `StemGrowth`: the estimated stem growth trends data, including the tree
+                   age chronosequence and the corresponding growth data of
+                   diameter at breast height (DBH), stem height, and stem
+                   volume
+   - `allomCarbon`: the estimated tree biomass and carbon storage data by
+                    using allometric models, including tree biomass and
+                    carbon storage for each tissues (stem, branch, leaf,
+                    root, and total tree)
+   - `volumeCarbon`: the estimated tree biomass and carbon storage data by
+                    using volume model, including tree biomass and
+                    carbon storage for each tissues (stem, branch, leaf,
+                    root, and total tree)
+}
 \description{
-Reconstructing tree growth and carbon accumulation with stem analysis data
+Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
 }
 \examples{
 
@@ -58,4 +74,20 @@ stemanalysism(xtree = 8, stemdata = stemdata)
 stemanalysism(xtree = 8, stemgrowth = TRUE, treecarbon = TRUE,
     stemdata = stemdata, parameterdata = parameterdata)
 
+}
+\references{
+Fang, J., Chen, A., Peng, C., et al. (2001)
+Changes in forest biomass carbon storage in China between 1949 and 1998.
+\emph{Science}
+\bold{292}, 2320-2322. {doi:10.1126/science.1058629}
+
+Mehtatalo, L. (2017)
+Lmfor: Functions for forest biometrics.
+{https://CRAN.R-project.org/package=lmfor}
+
+Xiang, W.H., Li, L.H., Ouyang, S., et al. (2021)
+Effects of stand age on tree biomass partitioning and allometric equations
+    in Chinese fir (Cunninghamia lanceolata) plantations.
+\emph{European Journal of Forest Research}
+\bold{140}, 317-332. {doi:10.1007/s10342-020-01333-0}
 }

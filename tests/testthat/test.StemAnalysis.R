@@ -8,8 +8,8 @@ test_that("stem growth analysis", {
   result1 <- stemanalysism(xtree = 4, stemgrowth = TRUE, stemdata = stemdata)
   result2 <- stemanalysism(xtree = 6, stemgrowth = TRUE, stemdata = stemdata)
 
-  expect_type(result1, "character")
-  expect_type(result2, "character")
+  expect_type(result1, "list")
+  expect_type(result2, "list")
 
 })
 
@@ -25,8 +25,8 @@ test_that("estimation of tree biomass and carbon storage", {
   result2 <- stemanalysism(xtree = 6, treecarbon = TRUE, stemdata = stemdata,
                            parameterdata = parameterdata)
 
-  expect_type(result1, "character")
-  expect_type(result2, "character")
+  expect_type(result1, "list")
+  expect_type(result2, "list")
 
 })
 
@@ -42,8 +42,8 @@ test_that("estimation of tree biomass and carbon storage", {
   result2 <- stemanalysism(xtree = 6, treecarbon = TRUE, stemdata = stemdata,
                            BEFdata = BEFdata)
 
-  expect_type(result1, "character")
-  expect_type(result2, "character")
+  expect_type(result1, "list")
+  expect_type(result2, "list")
 
 })
 
