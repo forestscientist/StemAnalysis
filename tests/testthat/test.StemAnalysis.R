@@ -62,3 +62,18 @@ test_that("height-diameter model", {
 })
 
 
+
+test_that("all", {
+
+  path <- system.file(stemdata, package = "StemAnalysis")
+  path1 <- system.file(BEFdata, package = "StemAnalysis")
+  path2 <- system.file(parameterdata, package = "StemAnalysis")
+
+  result1 <- stemanalysism(xtree = 4, stemgrowth = TRUE, HDmodel = TRUE,
+                           treecarbon = TRUE, stemdata = stemdata,
+                           BEFdata = BEFdata, parameterdata = parameterdata)
+
+  expect_type(result1, "list")
+
+})
+

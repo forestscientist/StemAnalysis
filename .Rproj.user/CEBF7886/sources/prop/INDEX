@@ -1,4 +1,8 @@
+~%2FGitHub%2FStemAnalysis%2F.github%2F.gitignore="76113BC8"
+~%2FGitHub%2FStemAnalysis%2F.github%2Fworkflows%2FCODECOV_TOKEN.yaml="BCCC19AA"
+~%2FGitHub%2FStemAnalysis%2F.github%2Fworkflows%2FR-CMD-check.yaml="6697EB36"
 ~%2FGitHub%2FStemAnalysis%2F.travis.yml="86C8EE3E"
 ~%2FGitHub%2FStemAnalysis%2FDESCRIPTION="BD5C888B"
 ~%2FGitHub%2FStemAnalysis%2FNAMESPACE="BBEB7359"
 ~%2FGitHub%2FStemAnalysis%2FREADME.md="D9D704EB"
+~%2FGitHub%2FStemAnalysis%2Ftests%2Ftestthat%2Ftest.StemAnalysis.R="974D866D"
