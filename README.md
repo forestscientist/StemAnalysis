@@ -94,7 +94,6 @@ str(d_BEF)
 ```{r, eval=TRUE, cache=TRUE}
 stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 ```
-#### Table 1 The tree age chronosequence and the corresponding growth data of DBH, stem height, and stem volume. stemdj is the age class of a tree growths (year); DBHt is the tree diameter at breast height (cm); Height is the tree height (m); Volume is the tree stem volume (m3); AnincreD is the mean annual increment of diameter at breast height (cm); AvincreD is the current annual increment of diameter at breast height (cm); AnincreH is the mean annual increment of tree height (m); AvincreH is the current annual increment of tree height (m); AnincreV is the mean annual increment of tree stem volume (m3); AvincreV is the current annual increment of tree stem volume (m3).
 
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/StemGrowth.png)
 
@@ -105,11 +104,8 @@ stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 #### If set 'treecarbon = TRUE' and provide parameter data, tree biomass and carbon accumulation estimated by allometric models.
 
 ```{r, eval=TRUE, cache=TRUE}
-allomcarbon <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, parameterdata = d_parameters)
-knitr::kable(allomcarbon)
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, parameterdata = d_parameters)
 ```
-#### Table 2 The stem growth data (the same to Table 1) and tree biomass and carbon storage that estimated by allometric models. treeage is the age class of a tree growths (year); stemB is the stem biomass of a sampled tree (kg); branchB is the branch biomass of a sampled tree (kg); leafB is the leaf biomass of a sampled tree (kg); rootB is the root biomass of a sampled tree (kg); totalB is the total tree biomass of a sampled tree (kg); stemC is the stem carbon storage of a sampled tree (kg); branchC is the branch carbon storage of a sampled tree (kg); leafC is the leaf carbon storage of a sampled tree (kg); rootC is the root carbon storage of a sampled tree (kg); totalC is the total tree carbon storage of a sampled tree (kg).
-
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_allometric.png)
 
 #### Figure 4 The age dynamics of total tree biomass (a) and carbon storage (b) for the 20-year-old tree estimated using allometric models.
@@ -118,11 +114,8 @@ knitr::kable(allomcarbon)
 #### If set 'treecarbon = TRUE' and provide biomass expansion factor data, tree biomass and carbon accumulation estimated by volume model.
 
 ```{r, eval=TRUE, cache=TRUE}
-volumecarbon <- stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, BEFdata = d_BEF)
-knitr::kable(volumecarbon)
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, BEFdata = d_BEF)
 ```
-#### Table 3 The stem growth data (the same to Table 1) and tree biomass and carbon storage that estimated by volume model. treeage is the age class of a tree growths (year); stemB is the stem biomass of a sampled tree (kg); abovegroundB is the aboveground biomass of a sampled tree (kg); belowgroundB is the belowground biomass of a sampled tree (kg); totalB is the total tree biomass of a sampled tree (kg); stemC is the stem carbon storage of a sampled tree (kg); abovegroundC is the aboveground carbon storage of a sampled tree (kg); belowgroundC is the belowground carbon storage of a sampled tree (kg); totalC is the total tree carbon storage of a sampled tree (kg).
-
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_volume.png)
 
 #### Figure 5 The age dynamics of total tree biomass (a) and carbon storage (b) for the 20-year-old tree estimated using volume model.
@@ -133,7 +126,6 @@ knitr::kable(volumecarbon)
 ```{r, eval=FALSE, cache=TRUE}
 stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = d_stem)
 ```
-
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_volume.png)
 
 #### Figure 6 Tree height-diameter relationships for the 20-year-old tree. The fitted curves of the Chapman-Richards model (red line), Logistic model (blue line), Weibull model (green line), and Gomperz model (yellow line) as well as their fitted statistics. a, b and C are the parameters of the nonlinear models; R2 is the coefficient of determination; RMSE is the root mean square error; RSS is the residual sum of squares.
