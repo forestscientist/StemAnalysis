@@ -53,9 +53,11 @@ str(d_stem)
 #### Dnobark10: The diameter for the 10th age class inner growth ring of the cross-sectional disc (cm)
 #### Dnobark11: The diameter for the 11th age class inner growth ring of the cross-sectional disc (cm)
 
+
 ![image](https://github.com/forestscientist/StemAnalysis/blob/main/man/Figures/stemheight.png)
 
 #### Figure 1 Two sampling scenarios of cross-sectional discs obtained from individual trees. Scenario 1, for the tree height lower than 10 m, the cross-sectional discs were obtained at the height of 0 m (ground level), 0.5 m, 1.3 m, 1.5 m, and at 1-m intervals thereafter; scenario 2, for the tree height higher than 10 m, were collected at the height of 0 m, 1.3 m, 3.6 m, and at 2-m intervals thereafter. Tree age of the example tree for scenario 1 is 12-years-old and for scenario 2 is 31-years-old.
+
 
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/measuremethod.png)
 
@@ -95,6 +97,7 @@ str(d_BEF)
 stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 ```
 
+
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/StemGrowth.png)
 
 #### Figure 3 Stem growth patterns of an individual tree. (a) shows the stem growth pattern; (b), (c), and (d) are the cumulative growth and (e), (f), and (g) are the mean annual increment (red dotted line) and current annual increment (blue dashed line) of DBH, tree height, and wood volume, respectively.
@@ -106,6 +109,8 @@ stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 ```{r, eval=TRUE, cache=TRUE}
 stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, parameterdata = d_parameters)
 ```
+
+
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_allometric.png)
 
 #### Figure 4 The age dynamics of total tree biomass (a) and carbon storage (b) for the 20-year-old tree estimated using allometric models.
@@ -116,6 +121,8 @@ stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, parameterdata = d
 ```{r, eval=TRUE, cache=TRUE}
 stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, BEFdata = d_BEF)
 ```
+
+
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_volume.png)
 
 #### Figure 5 The age dynamics of total tree biomass (a) and carbon storage (b) for the 20-year-old tree estimated using volume model.
@@ -126,6 +133,8 @@ stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem, BEFdata = d_BEF)
 ```{r, eval=FALSE, cache=TRUE}
 stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = d_stem)
 ```
+
+
 ![image](https://github.com/forestscientist/StemaAnalysis/blob/main/man/Figures/TreeCarbon_volume.png)
 
 #### Figure 6 Tree height-diameter relationships for the 20-year-old tree. The fitted curves of the Chapman-Richards model (red line), Logistic model (blue line), Weibull model (green line), and Gomperz model (yellow line) as well as their fitted statistics. a, b and C are the parameters of the nonlinear models; R2 is the coefficient of determination; RMSE is the root mean square error; RSS is the residual sum of squares.
