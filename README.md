@@ -5,60 +5,29 @@
 [![Travis build status](https://travis-ci.com/forestscientist/StemAnalysis.svg?branch=main)](https://travis-ci.com/forestscientist/StemAnalysis)
 <!-- badges: end -->
 
----
-author: "Huili Wu", "Wenhua Xiang"
-date: "2022-11-17"
-vignette: >
-  %\VignetteIndexEntry{StemAnalysis: reconstructing tree growth and carbon accumulation in R}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
 ## Abstract
-#### StemAnalysis R package is a tool for designed to reconstruct stem growth profiles, construct height-
-#### diameter relationships, and consequently to compute growth trends in terms of diameter at breast height 
-#### (DBH), tree height, stem volume, tree biomass and carbon storage for an individual tree. This
-#### vignette provides an overview of this package functions and options. We provide a working examples 
-#### that demonstrates the basic functionality and use of the package.
+#### StemAnalysis R package is a tool for designed to reconstruct stem growth profiles, construct height-diameter relationships, and consequently to compute growth trends in terms of diameter at breast height (DBH), tree height, stem volume, tree biomass and carbon storage for an individual tree. This vignette provides an overview of this package functions and options. We provide a working examples that demonstrates the basic functionality and use of the package.
 
 ## Purpose
-#### Accurate information about age dynamics of timber production and carbon storage in forest 
-#### ecosystems is frequently required by scientists, stakeholders, and policymakers. Stem analysis is a 
-#### technique for measuring tree growth (Salas-Eljatib, 2021). The computational burden of reconstructing 
-#### temporal, radial, and longitudinal patterns of tree growth, fitting height-diameter relationships, and 
-#### calculating diameter with bark from radial annual-ring increment sequences measured on multiple 
-#### cross-sectional discs, may present a hindrance to application of stem analysis methodology in forest 
-#### research investigations and operational forest multifunctional management (Newton, 2019). Therefore, 
-#### a standardized tool, StemAnalysis R package, is developed to calculate tree growth dynamics and 
-#### then make the stem analysis technique more conveniently applied to forest multifunctional 
-#### investigation.
-
-
-```{r, setup, include=FALSE}
-knitr::opts_chunk$set(comment = "#>")
-require(knitr)
-require(StemAnalysis)
-```
+#### Accurate information about age dynamics of timber production and carbon storage in forest ecosystems is frequently required by scientists, stakeholders, and policymakers. Stem analysis is a technique for measuring tree growth (Salas-Eljatib, 2021). The computational burden of reconstructing  temporal, radial, and longitudinal patterns of tree growth, fitting height-diameter relationships, and calculating diameter with bark from radial annual-ring increment sequences measured on multiple cross-sectional discs, may present a hindrance to application of stem analysis methodology in forest research investigations and operational forest multifunctional management (Newton, 2019). Therefore, a standardized tool, StemAnalysis R package, is developed to calculate tree growth dynamics and then make the stem analysis technique more conveniently applied to forest multifunctional investigation.
 
 
 # 1. Installation
+#### To install the current (development) version from the repository, run the following command:
 
 ```{r, eval=FALSE}
-install.packages("StemAnalysis")
+if(!require(devtools)){install.packages(devtools)}
+devtools::install_github(repo = "forestscientist/StemAnalysis", subdir = "pkg", build_vignettes = T)
 ```
 
 # 2. Load the package
 
 ```{r, eval=FALSE}
 require(StemAnalysis)
-require(knitr) # To input tables in this document
 ```
 
 # 3. Load the stem analysis data stored in the package
-#### d_stem is a dataset containing the input data of stem analysis. Note: If a user uses the StemAnalysis 
-#### package to analysis a very big tree, the number of inner growth rings that diameter measured for some 
-#### cross-sectional discs may be more than 11, the Dnobark12, Dnobark13, and much more variables can 
-#### be added, which also could successfully run.
+#### d_stem is a dataset containing the input data of stem analysis. Note: If a user uses the StemAnalysis package to analysis a very big tree, the number of inner growth rings that diameter measured for some cross-sectional discs may be more than 11, the Dnobark12, Dnobark13, and much more variables can be added, which also could successfully run.
 
 ```{r, eval=TRUE, cache=TRUE}
 data(d_stem)
@@ -199,4 +168,3 @@ knitr::include_graphics("../man/Figures/HDmodel.png")
 #### Salas-Eljatib, C. (2021) A new algorithm for reconstructing the height growth with stem analysis data. Methods Ecol. Evol. 12, 2008–2016.
 
 #### Xiang, W.H., Li, L.H., Ouyang, S., Xiao, W.F., Zeng, L.X., Chen, L., Lei, P.F., Deng, X.W., Zeng, Y.L., Fang, J.P. & Forrester, D.I. (2021) Effects of stand age on tree biomass partitioning and allometric equations in Chinese fir (Cunninghamia lanceolata) plantations. Eur. J. For. Res. 140, 317–332.
-
