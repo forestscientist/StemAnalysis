@@ -34,17 +34,17 @@ data(d_stem)
 str(d_stem)
 ```
 ### The list of input variables and their description in d_stem dataset
-#### No: The line number
-#### Treeno: The tree number for the sampled tree, the same number represents the same tree
-#### TreeTH: Tree total height (m)
-#### stemheight: The stem height that the cross-sectional discs were obtained (m). The detail information see Figure 1
-#### stemage: The age at the stem height, namely the number of growth rings of the cross-sectional disc (year)
-#### Dwithbark: The maximum diameter of the cross-sectional disc with bark (cm)
-#### Dnobark0: The maximum diameter of the cross-sectional disc without bark (cm)
-#### Dnobark1: The diameter for the 1th age class inner growth ring of the cross-sectional disc (cm). The detail information see Figure 2
-#### Dnobark2: The diameter for the 2th age class inner growth ring of the cross-sectional disc (cm)
-#### Dnobark3: The diameter for the 3th age class inner growth ring of the cross-sectional disc (cm)
-#### Dnobark4: The diameter for the 4th age class inner growth ring of the cross-sectional disc (cm)
+No: The line number
+Treeno: The tree number for the sampled tree, the same number represents the same tree
+TreeTH: Tree total height (m)
+stemheight: The stem height that the cross-sectional discs were obtained (m). The detail information see Figure 1
+stemage: The age at the stem height, namely the number of growth rings of the cross-sectional disc (year)
+Dwithbark: The maximum diameter of the cross-sectional disc with bark (cm)
+Dnobark0: The maximum diameter of the cross-sectional disc without bark (cm)
+Dnobark1: The diameter for the 1th age class inner growth ring of the cross-sectional disc (cm). The detail information see Figure 2
+Dnobark2: The diameter for the 2th age class inner growth ring of the cross-sectional disc (cm)
+Dnobark3: The diameter for the 3th age class inner growth ring of the cross-sectional disc (cm)
+Dnobark4: The diameter for the 4th age class inner growth ring of the cross-sectional disc (cm)
 #### Dnobark5: The diameter for the 5th age class inner growth ring of the cross-sectional disc (cm)
 #### Dnobark6: The diameter for the 6th age class inner growth ring of the cross-sectional disc (cm)
 #### Dnobark7: The diameter for the 7th age class inner growth ring of the cross-sectional disc (cm)
