@@ -1,38 +1,20 @@
 #' Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
 #'
-#' @param xtree Xtree is the tree number (Treeno), which is used to choose the
-#'     target tree to be analyzed
-#' @param stemgrowth If stemgrowth is 'TRUE', stem growth profile and growth
-#'     trends in terms of diameter at breast height (DBH), tree height, and
-#'     stem volume will be showed in a graph
-#' @param treecarbon If treecarbon is 'TRUE', total tree biomass and carbon
-#'     storage will be estimated by allometric models (Xiang et al., 2021) and
-#'     volume model (IPCC, 2003). In addition, although treecarbon is 'TRUE',
-#'     the estimation of tree biomass and carbon storage by allometric models
-#'     will skip if data 'parameterdata' is missing, and the same is true for
-#'     the estimation by volume model if data 'BEFdata' is missing
-#' @param HDmodel If HDmodel is 'TRUE', height-diameter relationship will be
-#'     fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted
-#'     results in a graph
-#' @param stemdata Stemdata is the stem analysis data that has been inputted
-#' @param parameterdata Parameterdata is the parameter data of allometric
-#'     models that can be optionally inputted
-#' @param BEFdata BEFdata is the biomass estimation factor data of volume model
-#'     that can be optionally inputted by users
+#' @param xtree Xtree is the tree number (Treeno), which is used to choose a target tree to be analyzed
+#' @param stemgrowth If stemgrowth is 'TRUE', stem growth profile and growth trends in terms of diameter at breast height (DBH), tree height, and stem volume will be showed in a graph. A example graph is man/Figures/StemGrowth.png
+#' @param treecarbon If treecarbon is 'TRUE', total tree biomass and carbon storage will be estimated by allometric models (Xiang et al., 2021) and volume model (IPCC, 2003). The example graphs are man/Figures/TreeCarbon_allometric.png and TreeCarbon_volume. In addition, although treecarbon is 'TRUE', the estimation of tree biomass and carbon storage by allometric models will skip if 'parameterdata' is missing, and the same is true for the estimation by volume model if 'BEFdata' is missing.
+#' @param HDmodel If HDmodel is 'TRUE', height-diameter relationship will be fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted results in a graph. A example graph is man/Figures/HDmodel.png
+#' @param stemdata table as described in \code{\link{d_stem}} containing the information about stem analysis data.
+#' @param parameterdata table as described in \code{\link{d_parameters}} containing the information about the parameter data of allometric models that can be optionally inputted by users
+#' @param BEFdata table as described in \code{\link{d_BEF}} containing the information about the biomass expansion factor data for volume model that can be optionally inputted by users
 #'
-#' @return A list with class "output" containing the following components:
-#'    - `StemGrowth`: the estimated stem growth trends data, including the tree
-#'                    age chronosequence and the corresponding growth data of
-#'                    diameter at breast height (DBH), stem height, and stem
-#'                    volume
-#'    - `allomCarbon`: the estimated tree biomass and carbon storage data by
-#'                     using allometric models, including tree biomass and
-#'                     carbon storage for each tissues (stem, branch, leaf,
-#'                     root, and total tree)
-#'    - `volumeCarbon`: the estimated tree biomass and carbon storage data by
-#'                     using volume model, including tree biomass and
-#'                     carbon storage for each tissues (stem, branch, leaf,
-#'                     root, and total tree)
+#' @note The \code{stemanalysis} was performed on individual trees
+#'
+#' @return A list with class "output" containing three data.frame.
+#'    - `StemGrowth`: the estimated stem growth trends data for a target tree, including the tree age class and the corresponding growth data of diameter at breast height (DBH), stem height, and stem volume. More details on the output is \code{\link{r_StemGrowth}}
+#'    - `allomCarbon`: the estimated tree biomass and carbon storage data by using allometric models for a target tree, including tree biomass and carbon storage for each tissues (stem, branch, leaf, root, and total tree). More details on the output is \code{\link{r_allomCarbon}}
+#'    - `volumeCarbon`: the estimated tree biomass and carbon storage data by using volume model for a target tree, including tree biomass and carbon storage for each tissues (stem, aboveground, belowground, and total tree). More details on the output is \code{\link{r_volumeCarbon}}
+#'
 #' @export
 #'
 #' @references Fang, J., Chen, A., Peng, C., et al. (2001)
@@ -55,21 +37,28 @@
 #' library(StemAnalysis)
 #'
 #' # Load the data sets
-#' data(stemdata)
-#' data(parameterdata)
+#' data(d_stem)
+#' data(d_BEF)
+#' data(d_parameters)
 #'
-#' # To calculating tree growth and carbon accumulation with input data sets
-#' stemanalysism(xtree = 8, stemdata = stemdata)
+#' # To calculating stem growth trends for an individual tree is needed
+#' stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 #'
-#' # If the graph of stem growth profile and growth trends is needed
-#' stemanalysism(xtree = 8, stemgrowth = TRUE, treecarbon = TRUE,
-#'     stemdata = stemdata, parameterdata = parameterdata)
+#' # To calculating tree carbon storage by allometric models is needed
+#' stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
+#'              parameterdata = d_parameters)
+#'
+#' # To calculating tree carbon storage by volume model is needed
+#' stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
+#'              BEFdata = d_BEF)
+#'
+#' # To fitting the height-diameter relationships
+#' stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = d_stem)
 #'
 #' @importFrom grDevices dev.new
 #' @importFrom graphics axis layout layout.show legend lines mtext par
 #' @importFrom stats anova lm nls nls.control predict residuals
 #' @importFrom utils write.table
-
 
 
 stemanalysism <- function(xtree, stemgrowth = FALSE,
@@ -79,10 +68,6 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
 
   # list estimation data
   output <- list()
-
-  ## To maintain user's original options
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
 
   # Extract data of a given tree by selecting the appropriate Treeno
   stemdata1 <- subset(stemdata, Treeno == xtree)
@@ -303,9 +288,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   AnincreH <- c(0, AnincreH1)
   AnincreV <- c(0, AnincreV1)
 
-  # Construct data frame containing DBH, height, and volume and growth data
-  output$StemGrowth <- data.frame(Mydata, AnincreD, AvincreD,
+  # Construct data frame containing DBH, height, and volume growth data
+  StemGrowth <- data.frame(Mydata, AnincreD, AvincreD,
                            AnincreH, AvincreH, AnincreV, AvincreV)
+  output$StemGrowth <- round(StemGrowth,3)
 
 
 
@@ -317,94 +303,94 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
 
     # Calculate tree biomass using allometric models
     stem_pa <- subset(parameterdata,parameterdata$tissues=="stem")
-    stem_biomass <- ifelse(DBH!=0,
-                           exp(stem_pa$a+stem_pa$b*log(DBH^2*Height)), DBH)
-    stem_biomass <- as.numeric(stem_biomass)
+    stemB <- ifelse(DBH!=0,
+                    exp(stem_pa$a+stem_pa$b*log(DBH^2*Height)), DBH)
+    stemB <- as.numeric(stemB)
 
     branch_pa <- subset(parameterdata,parameterdata$tissues=="branch")
-    branch_biomass <- ifelse(DBH!=0,
-                             exp(branch_pa$a+branch_pa$b*log(DBH^2*Height)),
-                             DBH)
-    branch_biomass <- as.numeric(branch_biomass)
+    branchB <- ifelse(DBH!=0,
+                      exp(branch_pa$a+branch_pa$b*log(DBH^2*Height)),
+                      DBH)
+    branchB <- as.numeric(branchB)
 
     leaf_pa <- subset(parameterdata,parameterdata$tissues=="leaf")
-    leaf_biomass <- ifelse(DBH!=0,
-                           exp(leaf_pa$a+leaf_pa$b*log(DBH^2*Height)), DBH)
-    leaf_biomass <- as.numeric(leaf_biomass)
+    leafB <- ifelse(DBH!=0,
+                    exp(leaf_pa$a+leaf_pa$b*log(DBH^2*Height)), DBH)
+    leafB <- as.numeric(leafB)
 
     root_pa <- subset(parameterdata,parameterdata$tissues=="root")
-    root_biomass <- ifelse(DBH!=0,
-                           exp(root_pa$a+root_pa$b*log(DBH^2*Height)), DBH)
-    root_biomass <- as.numeric(root_biomass)
+    rootB <- ifelse(DBH!=0,
+                    exp(root_pa$a+root_pa$b*log(DBH^2*Height)), DBH)
+    rootB <- as.numeric(rootB)
 
     total_pa <- subset(parameterdata,parameterdata$tissues=="total")
-    total_biomass <- stem_biomass+branch_biomass+root_biomass+leaf_biomass
-    total_biomass <- as.numeric(total_biomass)
+    totalB <- stemB+branchB+rootB+leafB
+    totalB <- as.numeric(totalB)
 
     # Calculate tree carbon storage
-    stem_C <-  stem_biomass*stem_pa$Cconcentration
-    stem_C <- as.numeric(stem_C)
+    stemC <-  stemB*stem_pa$Cconcentration
+    stemC <- as.numeric(stemC)
 
-    branch_C <- branch_biomass*branch_pa$Cconcentration
-    branch_C <- as.numeric(branch_C)
+    branchC <- branchB*branch_pa$Cconcentration
+    branchC <- as.numeric(branchC)
 
-    leaf_C <- leaf_biomass*leaf_pa$Cconcentration
-    leaf_C <- as.numeric(leaf_C)
+    leafC <- leafB*leaf_pa$Cconcentration
+    leafC <- as.numeric(leafC)
 
-    root_C <- root_biomass*root_pa$Cconcentration
-    root_C <- as.numeric(root_C)
+    rootC <- rootB*root_pa$Cconcentration
+    rootC <- as.numeric(rootC)
 
-    total_C <- total_biomass*total_pa$Cconcentration
-    total_C <- as.numeric(total_C)
+    totalC <- totalB*total_pa$Cconcentration
+    totalC <- as.numeric(totalC)
 
     # Construct data frame that contains tree biomass and carbon storage
-    stemdj <- as.numeric(stemdj)
-    allomCarbon <- cbind(stemdj, stem_biomass, branch_biomass, leaf_biomass,
-                         root_biomass, total_biomass, stem_C, branch_C,
-                         leaf_C, root_C, total_C)
-    output$allomCarbon <- as.data.frame(allomCarbon)
-
+    treeage <- as.numeric(stemdj)
+    allomCarbon <- cbind(treeage, stemB, branchB, leafB,
+                         rootB, totalB, stemC, branchC,
+                         leafC, rootC, totalC)
+    allomCarbon <- as.data.frame(allomCarbon)
+    output$allomCarbon <- round(allomCarbon,3)
   }
 
   # Check if there a BEFdata exists
   if(!missing(BEFdata)){
 
     # Calculate tree biomass using volume model
-    stem_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*1000,Volume)
-    stem_bio <- as.numeric(stem_bio)
+    stemB <- ifelse(Volume!=0,Volume*BEFdata$WD*1000,Volume)
+    stemB <- as.numeric(stemB)
 
-    aboveground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*1000,Volume)
-    aboveground_bio <- as.numeric(aboveground_bio)
+    abovegroundB <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*1000,Volume)
+    abovegroundB <- as.numeric(abovegroundB)
 
-    belowground_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*BEFdata$R*1000,Volume)
-    belowground_bio <- as.numeric(belowground_bio)
+    belowgroundB <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*BEFdata$R*1000,Volume)
+    belowgroundB <- as.numeric(belowgroundB)
 
-    total_bio <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*(1+BEFdata$R)*1000,Volume)
-    total_bio <- as.numeric(total_bio)
+    totalB <- ifelse(Volume!=0,Volume*BEFdata$WD*BEFdata$BEF*(1+BEFdata$R)*1000,Volume)
+    totalB <- as.numeric(totalB)
 
     # Calculate tree carbon storage
-    stem_Carbon <-  stem_bio*BEFdata$Cconcentration
-    stem_Carbon <- as.numeric(stem_Carbon)
+    stemC <-  stemB*BEFdata$Cconcentration
+    stemC <- as.numeric(stemC)
 
-    aboveground_Carbon <- aboveground_bio*BEFdata$Cconcentration
-    aboveground_Carbon <- as.numeric(aboveground_Carbon)
+    abovegroundC <- abovegroundB*BEFdata$Cconcentration
+    abovegroundC <- as.numeric(abovegroundC)
 
-    belowground_Carbon <- belowground_bio*BEFdata$Cconcentration
-    belowground_Carbon <- as.numeric(belowground_Carbon)
+    belowgroundC <- belowgroundB*BEFdata$Cconcentration
+    belowgroundC <- as.numeric(belowgroundC)
 
-    total_Carbon <- total_bio*BEFdata$Cconcentration
-    total_Carbon <- as.numeric(total_Carbon)
+    totalC <- totalB*BEFdata$Cconcentration
+    totalC <- as.numeric(totalC)
 
 
     # Construct data frame that contains tree biomass and tree carbon storage
-    stemdj <- as.numeric(stemdj)
+    treeage <- as.numeric(stemdj)
 
-    volumeCarbon <- cbind(stemdj, stem_bio, aboveground_bio,
-                          belowground_bio, total_bio, stem_Carbon,
-                          aboveground_Carbon, belowground_Carbon,
-                          total_Carbon)
-    output$volumeCarbon <- as.data.frame(volumeCarbon)
-
+    volumeCarbon <- cbind(treeage, stemB, abovegroundB,
+                          belowgroundB, totalB, stemC,
+                          abovegroundC, belowgroundC,
+                          totalC)
+    volumeCarbon <- as.data.frame(volumeCarbon)
+    output$volumeCarbon <- round(volumeCarbon,3)
   }
 
 
@@ -496,38 +482,38 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
 
     # Draw graphics for the cumulative growth
     with(output$StemGrowth, plot(stemdj, DBHt, type = "b", pch = 16,
-                          col = "forestgreen", lwd = 2, cex = 1.5,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * max(DBHt)), xlab = "Age (years)",
-                          ylab = "DBH (cm)", las = 1, cex.lab = 1.1))
+                                 col = "forestgreen", lwd = 2, cex = 1.5,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * max(DBHt)), xlab = "Age (years)",
+                                 ylab = "DBH (cm)", las = 1, cex.lab = 1.1))
     legend("topleft", "(b)", cex = 1.1, box.lty = 0)
 
     with(output$StemGrowth, plot(stemdj, Height, type = "b", pch = 16,
-                          col = "forestgreen", lwd = 2, cex = 1.5,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * max(Height)), xlab = "Age (years)",
-                          ylab = "Height (m)", las = 1, cex.lab = 1.1))
+                                 col = "forestgreen", lwd = 2, cex = 1.5,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * max(Height)), xlab = "Age (years)",
+                                 ylab = "Height (m)", las = 1, cex.lab = 1.1))
     legend("topleft", "(c)", cex = 1.1, box.lty = 0)
 
     with(output$StemGrowth, plot(stemdj, Volume, type = "b", pch = 16,
-                          col = "forestgreen", lwd = 2, cex = 1.5,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * max(Volume)), xlab = "Age (years)",
-                          ylab = expression(paste("Volume (m"^"3", ")")),
-                          las = 1, cex.lab = 1.1))
+                                 col = "forestgreen", lwd = 2, cex = 1.5,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * max(Volume)), xlab = "Age (years)",
+                                 ylab = expression(paste("Volume (m"^"3", ")")),
+                                 las = 1, cex.lab = 1.1))
     legend("topleft", "(d)", cex = 1.1, box.lty = 0)
 
     # Draw graphics for the mean annual increment and current annual increment
     with(output$StemGrowth, plot(stemdj, AnincreD, type = "l", lty = "dashed", pch = 16,
-                          col = "blue", lwd = 2, cex = 1.2,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * (max(max(AnincreD), max(AvincreD)))),
-                          xlab = "Age (years)",
-                          ylab = expression(paste
-                                            ("DBH increment (cm", " year"^"-1", ")")),
-                          las = 1, cex.lab = 1.1))
+                                 col = "blue", lwd = 2, cex = 1.2,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * (max(max(AnincreD), max(AvincreD)))),
+                                 xlab = "Age (years)",
+                                 ylab = expression(paste
+                                                   ("DBH increment (cm", " year"^"-1", ")")),
+                                 las = 1, cex.lab = 1.1))
     with(output$StemGrowth, lines(stemdj, AvincreD, lty = "dotted", pch = 16,
-                           col = "red", lwd = 2, cex = 1.2))
+                                  col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(e)", cex = 1.1, box.lty = 0)
     legend("topright",
            col = c("blue", "red"), cex = 1, box.lty = 0, lwd = 2,
@@ -536,27 +522,27 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     )
 
     with(output$StemGrowth, plot(stemdj, AnincreH, type = "l", lty = "dashed", pch = 1,
-                          col = "blue", lwd = 2, cex = 1.2,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * (max(max(AnincreH), max(AvincreH)))),
-                          xlab = "Age (years)",
-                          ylab = expression(paste
-                                            ("Height increment (m", " year"^"-1", ")")),
-                          las = 1, cex.lab = 1.1))
+                                 col = "blue", lwd = 2, cex = 1.2,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * (max(max(AnincreH), max(AvincreH)))),
+                                 xlab = "Age (years)",
+                                 ylab = expression(paste
+                                                   ("Height increment (m", " year"^"-1", ")")),
+                                 las = 1, cex.lab = 1.1))
     with(output$StemGrowth, lines(stemdj, AvincreH, lty = "dotted", pch = 16,
-                           col = "red", lwd = 2, cex = 1.2))
+                                  col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(f)", cex = 1.1, box.lty = 0)
 
     with(output$StemGrowth, plot(stemdj, AnincreV, type = "l", lty = "dashed", pch = 1,
-                          col = "blue", lwd = 2, cex = 1.2,
-                          xlim = c(0, max(stemdj) + Ageclass),
-                          ylim = c(0, 1.2 * (max(max(AnincreV), max(AvincreV)))),
-                          xlab = "Age (years)",
-                          ylab = expression(paste
-                                            ("Volume increment (m"^"3", " year"^"-1", ")"),
-                                            las = 1, cex.lab = 1.1)))
+                                 col = "blue", lwd = 2, cex = 1.2,
+                                 xlim = c(0, max(stemdj) + Ageclass),
+                                 ylim = c(0, 1.2 * (max(max(AnincreV), max(AvincreV)))),
+                                 xlab = "Age (years)",
+                                 ylab = expression(paste
+                                                   ("Volume increment (m"^"3", " year"^"-1", ")"),
+                                                   las = 1, cex.lab = 1.1)))
     with(output$StemGrowth, lines(stemdj, AvincreV, lty = "dotted", pch = 16,
-                           col = "red", lwd = 2, cex = 1.2))
+                                  col = "red", lwd = 2, cex = 1.2))
     legend("topleft", "(g)", cex = 1.1, box.lty = 0)
   }
 
@@ -592,10 +578,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
 
       # Draw a graph for tree biomass and carbon storage across tree age
       # The changes in tree biomass across tree age
-      with(Mydata2, plot(stemdj, total_biomass, type="b", lty=1, lwd=2, pch = 19,
+      with(Mydata2, plot(treeage, totalB, type="b", lty=1, lwd=2, pch = 19,
                          col = "blue", cex.axis=1.5, cex.lab=1.8,cex = 2,
-                         xlim = c(0, max(stemdj)+Ageclass),
-                         ylim = c(0, 1.2*(max(total_biomass))),
+                         xlim = c(0, max(treeage)+Ageclass),
+                         ylim = c(0, 1.2*(max(totalB))),
                          xlab = "Age (years)",
                          ylab = "Total tree biomass (kg)",las=1))
       legend("topleft", "(a)", cex = 1.8, box.lty = 0)
@@ -603,10 +589,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
              c("Estimated by allometric models"))
 
       # The changes in carbon storage across tree age
-      with(Mydata2, plot(stemdj, total_C, type="b", lty=1, lwd=2,pch = 19,
+      with(Mydata2, plot(treeage, totalC, type="b", lty=1, lwd=2,pch = 19,
                          col = "blue", cex.axis=1.5,cex.lab=1.8,cex = 2,
-                         xlim = c(0, max(stemdj)+Ageclass),
-                         ylim = c(0, 1.2*(max(max(total_C)))),
+                         xlim = c(0, max(treeage)+Ageclass),
+                         ylim = c(0, 1.2*(max(max(totalC)))),
                          xlab = "Age (years)",
                          ylab = "Total tree C storage (kg)", las=1))
       legend("topleft", "(b)", cex = 1.8, box.lty = 0)
@@ -635,10 +621,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
 
       # Draw a graph for tree biomass and carbon storage across tree age
       # The changes in tree biomass across tree age
-      with(Mydata3, plot(stemdj, total_bio, type="b", lty=1, lwd=2, pch = 19,
+      with(Mydata3, plot(treeage, totalB, type="b", lty=1, lwd=2, pch = 19,
                          col = "blue", cex.axis=1.5, cex.lab=1.8,cex = 2,
-                         xlim = c(0, max(stemdj)+Ageclass),
-                         ylim = c(0, 1.2*(max(total_bio))),
+                         xlim = c(0, max(treeage)+Ageclass),
+                         ylim = c(0, 1.2*(max(totalB))),
                          xlab = "Age (years)",
                          ylab = "Total tree biomass (kg)",las=1))
       legend("topleft", "(a)", cex = 1.8, box.lty = 0)
@@ -646,10 +632,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
              c("Estimated by volume model"))
 
       # The changes in carbon storage across tree age
-      with(Mydata3, plot(stemdj, total_Carbon, type="b", lty=1, lwd=2,pch = 19,
+      with(Mydata3, plot(treeage, totalC, type="b", lty=1, lwd=2,pch = 19,
                          col = "blue", cex.axis=1.5,cex.lab=1.8,cex = 2,
-                         xlim = c(0, max(stemdj)+Ageclass),
-                         ylim = c(0, 1.2*(max(max(total_Carbon)))),
+                         xlim = c(0, max(treeage)+Ageclass),
+                         ylim = c(0, 1.2*(max(max(totalC)))),
                          xlab = "Age (years)",
                          ylab = "Total tree C storage (kg)", las=1))
       legend("topleft", "(b)", cex = 1.8, box.lty = 0)
@@ -671,10 +657,10 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
   allomHD <- function() {
     # Open a new graph frame
     dev.new(title = "height-diameter relationships",
-            width = 4500, height = 2250, noRStudioGD = TRUE)
+            width = 2250, height = 3500, noRStudioGD = TRUE)
 
     # Define the parameters of graph
-    mat <- matrix(c(1, 2), 1, 2, byrow = FALSE)
+    mat <- matrix(c(1, 1, 2), 3, 1, byrow = FALSE)
     # mat
     layout(mat)
     layout.show(2)
@@ -762,7 +748,7 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     summary(HDgomperz)
     xv1_gomperz <- seq(0.3 * min(Mydata$DBHt), 1.1 * max(Mydata$DBHt), 0.0001)
     yv1_gomperz <- predict(HDgomperz, list(DBHt = xv1_gomperz))
-    lines(xv1_gomperz, yv1_gomperz, col = "gold", lwd = 3)
+    lines(xv1_gomperz, yv1_gomperz, col = "purple", lwd = 3)
     SSre_gomperz <- sum(residuals(HDgomperz)^2)
     SStot_gomperz <- sum((Mydata$Height - mean(Mydata$Height))^2)
     R2_gomperz <- 1 - SSre_gomperz / SStot_gomperz
@@ -771,132 +757,63 @@ stemanalysism <- function(xtree, stemgrowth = FALSE,
     RMSE_gomperz <- sqrt(sum(residuals(HDgomperz)^2) / (N - 2))
     RMSE_gomperz
 
-    legend("topright", "(a)", cex = 1.2, box.lty = 0)
     legend("topleft",
-           cex = 1.5, lwd = 2.5,
-           legend = c("HDrichards", "HDlogistic", "HDgomperz", "HDweibull"),
-           lty = 1, col = c("orangered", "blue", "forestgreen", "gold"),
+           cex = 1.5, lwd = 2.5, box.lty = 0,
+           text.col = c("orangered", "blue", "forestgreen", "purple"),
+           legend = c(
+             expression(paste
+                        ("HDrichards  H = 1.3 + a(1 - e"^"-bDBH","",")"^"c")),
+             expression(paste
+                        ("HDlogistic  H = 1.3 + a/(1 + be"^"-cDBH","",")")),
+             expression(paste
+                        ("HDweibull  H = 1.3 + a(1 - e"^"-bDBH"^"c","",")")),
+             expression(paste
+                        ("HDgomperz  H = 1.3 + ae"^("-be"^"-cDBH")))),
+           lty = 1, col = c("orangered", "blue", "forestgreen", "purple"),
            title = "Models"
     )
 
+    # Show the fitted statistics
+    # Draw a scatter plot
+    plot(Mydata$DBHt, Mydata$Height,
+         type = "n",xaxt = "n", yaxt ="n", bty = "n", ann = FALSE,
+         xlim = c(0, 1.1 * max(Mydata$DBHt)),
+         ylim = c(0, 1.1 * max(Mydata$Height))
+         )
+
     # Filter the model providing the best fit
-    min_Res <- min(anova(HDrichards, HDlogistic, HDgomperz, HDweibull)[2])
+    min_RSS <- min(anova(HDrichards, HDlogistic, HDgomperz, HDweibull)[2])
 
-    HDrichards_Res <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[1, 2]
-    HDlogistic_Res <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[2, 2]
-    HDweibull_Res <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[3, 2]
-    HDgomperz_Res <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[4, 2]
+    HDrichards_RSS <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[1, 2]
+    HDlogistic_RSS <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[2, 2]
+    HDweibull_RSS <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[3, 2]
+    HDgomperz_RSS <- anova(HDrichards, HDlogistic, HDweibull, HDgomperz)[4, 2]
 
-    if (min_Res == HDrichards_Res) {
-      plot(Mydata$DBHt, Mydata$Height,
-           pch = 21, bg = "purple",
-           cex.axis = 1.5, cex.lab = 1.8, cex = 3,
-           xlim = c(0, 1.1 * max(Mydata$DBHt)),
-           ylim = c(0, 1.1 * max(Mydata$Height)),
-           xlab = "Tree DBH (cm)", ylab = "Tree height (m)", las = 1
-      )
-      lines(xv1_richards, yv1_richards, col = "orangered", lwd = 3)
-      legend("topright", "(b)", cex = 1.2, box.lty = 0)
-      legend("topleft", cex = 1.5,
-             legend = c(expression(paste(italic(R)^2 == "")),
-                        expression(paste(italic(RMSE) == "")),
-                        round(R2_richards, 3), round(RMSE_richards, 3)),
-             title = "Associated statistics", ncol = 2)
-      legend("bottomright",
-             cex = 1.5,
-             legend = c(
-               "a =", "b =", "c =",
-               round(summary(HDrichards)$parameters[1], 3),
-               round(summary(HDrichards)$parameters[2], 3),
-               round(summary(HDrichards)$parameters[3], 3)
-             ),
-             title = "HDrichards Parameters",
-             ncol = 2
-      )
-    } else if (min_Res == HDlogistic_Res) {
-      plot(Mydata$DBHt, Mydata$Height,
-           pch = 21, bg = "purple",
-           cex.axis = 1.5, cex.lab = 1.8, cex = 3,
-           xlim = c(0, 1.1 * max(Mydata$DBHt)),
-           ylim = c(0, 1.1 * max(Mydata$Height)),
-           xlab = "Tree DBH (cm)", ylab = "Tree height (m)", las = 1
-      )
-      lines(xv1_logistic, yv1_logistic, col = "blue", lwd = 3)
-      legend("topright", "(b)", cex = 1.2, box.lty = 0)
-      legend("topleft", cex = 1.5,
-             legend = c(expression(paste(italic(R)^2 == "")),
-                        expression(paste(italic(RMSE) == "")),
-                        round(R2_logistic, 3), round(RMSE_logistic, 3)),
-             title = "Associated statistics", ncol = 2)
-      legend("bottomright",
-             cex = 1.5,
-             legend = c(
-               "a =", "b =", "c =",
-               round(summary(HDlogistic)$parameters[1], 3),
-               round(summary(HDlogistic)$parameters[2], 3),
-               round(summary(HDlogistic)$parameters[3], 3)
-             ),
-             title = "HDlogistic Parameters",
-             ncol = 2
-      )
-    } else if (min_Res == HDgomperz_Res) {
-      plot(Mydata$DBHt, Mydata$Height,
-           pch = 21, bg = "purple",
-           cex.axis = 1.5, cex.lab = 1.8, cex = 3,
-           xlim = c(0, 1.1 * max(Mydata$DBHt)),
-           ylim = c(0, 1.1 * max(Mydata$Height)),
-           xlab = "Tree DBH (cm)", ylab = "Tree height (m)", las = 1
-      )
-      lines(xv1_gomperz, yv1_gomperz, col = "gold", lwd = 3)
-      legend("topright", "(b)", cex = 1.2, box.lty = 0)
-      legend("topleft",
-             cex = 1.5,
-             legend = c(expression(paste(italic(R)^2 == "")),
-                        expression(paste(italic(RMSE) == "")),
-                        round(R2_gomperz, 3), round(RMSE_gomperz, 3)),
-             title = "Associated statistics", ncol = 2
-      )
-      legend("bottomright",
-             cex = 1.5,
-             legend = c(
-               "a =", "b =", "c =",
-               round(summary(HDgomperz)$parameters[1], 3),
-               round(summary(HDgomperz)$parameters[2], 3),
-               round(summary(HDgomperz)$parameters[3], 3)
-             ),
-             title = "HDgomperz Parameters",
-             ncol = 2
-      )
-    } else if (min_Res == HDweibull_Res) {
-      plot(Mydata$DBHt, Mydata$Height,
-           pch = 21, bg = "purple",
-           cex.axis = 1.5, cex.lab = 1.8, cex = 3,
-           xlim = c(0, 1.1 * max(Mydata$DBHt)),
-           ylim = c(0, 1.1 * max(Mydata$Height)),
-           xlab = "Tree DBH (cm)", ylab = "Tree height (m)", las = 1
-      )
-      lines(xv1_weibull, yv1_weibull, col = "gold", lwd = 3)
-      legend("topright", "(b)", cex = 1.2, box.lty = 0)
-      legend("topleft",
-             cex = 1.5,
-             legend = c(expression(paste(italic(R)^2 == "")),
-                        expression(paste(italic(RMSE) == "")),
-                        round(R2_weibull, 3), round(RMSE_weibull, 3)),
-             title = "Associated statistics", ncol = 2
-      )
-      legend("bottomright",
-             cex = 1.5,
-             legend = c(
-               "a =", "b =", "c =",
-               round(summary(HDweibull)$parameters[1], 3),
-               round(summary(HDweibull)$parameters[2], 3),
-               round(summary(HDweibull)$parameters[3], 3)
-             ),
-             title = "HDweibull parameters",
-             ncol = 2
-      )
-    }
-  }
+    legend("left",
+           cex = 1.5, bty = "n",
+           legend = c(
+             "Equation", "HDrichards", "HDlogistic", "HDweibull", "HDgomperz",
+             "a",round(summary(HDrichards)$parameters[1], 3),
+             round(summary(HDlogistic)$parameters[1], 3),
+             round(summary(HDweibull)$parameters[1], 3),
+             round(summary(HDgomperz)$parameters[1], 3),
+             "b", round(summary(HDrichards)$parameters[2], 3),
+             round(summary(HDlogistic)$parameters[2], 3),
+             round(summary(HDweibull)$parameters[2], 3),
+             round(summary(HDgomperz)$parameters[2], 3),
+             "c",round(summary(HDrichards)$parameters[3], 3),
+             round(summary(HDlogistic)$parameters[3], 3),
+             round(summary(HDweibull)$parameters[3], 3),
+             round(summary(HDgomperz)$parameters[3], 3),
+             "R2", round(R2_richards, 3), round(R2_logistic, 3),
+             round(R2_weibull, 3), round(R2_gomperz, 3),
+             "RMSE", round(RMSE_richards, 3), round(RMSE_logistic, 3),
+             round(RMSE_weibull, 3), round(RMSE_gomperz, 3),
+             "RSS",round(HDrichards_RSS, 3), round(HDlogistic_RSS, 3),
+             round(HDweibull_RSS, 3), round(HDgomperz_RSS, 3)),
+           title = "Fitted statistics of HDmodel", title.font = 2,
+           ncol = 7, text.width = c(1.6,0.75,0.75,0.75,0.75,0.75,0.75))
+ }
 
   # Whether to call the HDmodel graph
   if (HDmodel == TRUE) {

@@ -15,64 +15,54 @@ stemanalysism(
 )
 }
 \arguments{
-\item{xtree}{Xtree is the tree number (Treeno), which is used to choose the
-target tree to be analyzed}
+\item{xtree}{Xtree is the tree number (Treeno), which is used to choose a target tree to be analyzed}
 
-\item{stemgrowth}{If stemgrowth is 'TRUE', stem growth profile and growth
-trends in terms of diameter at breast height (DBH), tree height, and
-stem volume will be showed in a graph}
+\item{stemgrowth}{If stemgrowth is 'TRUE', stem growth profile and growth trends in terms of diameter at breast height (DBH), tree height, and stem volume will be showed in a graph. A example graph is man/Figures/StemGrowth.png}
 
-\item{treecarbon}{If treecarbon is 'TRUE', total tree biomass and carbon
-storage will be estimated by allometric models (Xiang et al., 2021) and
-volume model (IPCC, 2003). In addition, although treecarbon is 'TRUE',
-the estimation of tree biomass and carbon storage by allometric models
-will skip if data 'parameterdata' is missing, and the same is true for
-the estimation by volume model if data 'BEFdata' is missing}
+\item{treecarbon}{If treecarbon is 'TRUE', total tree biomass and carbon storage will be estimated by allometric models (Xiang et al., 2021) and volume model (IPCC, 2003). The example graphs are man/Figures/TreeCarbon_allometric.png and TreeCarbon_volume. In addition, although treecarbon is 'TRUE', the estimation of tree biomass and carbon storage by allometric models will skip if 'parameterdata' is missing, and the same is true for the estimation by volume model if 'BEFdata' is missing.}
 
-\item{HDmodel}{If HDmodel is 'TRUE', height-diameter relationship will be
-fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted
-results in a graph}
+\item{HDmodel}{If HDmodel is 'TRUE', height-diameter relationship will be fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted results in a graph. A example graph is man/Figures/HDmodel.png}
 
-\item{stemdata}{Stemdata is the stem analysis data that has been inputted}
+\item{stemdata}{table as described in \code{\link{d_stem}} containing the information about stem analysis data.}
 
-\item{parameterdata}{Parameterdata is the parameter data of allometric
-models that can be optionally inputted}
+\item{parameterdata}{table as described in \code{\link{d_parameters}} containing the information about the parameter data of allometric models that can be optionally inputted by users}
 
-\item{BEFdata}{BEFdata is the biomass estimation factor data of volume model
-that can be optionally inputted by users}
+\item{BEFdata}{table as described in \code{\link{d_BEF}} containing the information about the biomass expansion factor data for volume model that can be optionally inputted by users}
 }
 \value{
-A list with class "output" containing the following components:
-   - `StemGrowth`: the estimated stem growth trends data, including the tree
-                   age chronosequence and the corresponding growth data of
-                   diameter at breast height (DBH), stem height, and stem
-                   volume
-   - `allomCarbon`: the estimated tree biomass and carbon storage data by
-                    using allometric models, including tree biomass and
-                    carbon storage for each tissues (stem, branch, leaf,
-                    root, and total tree)
-   - `volumeCarbon`: the estimated tree biomass and carbon storage data by
-                    using volume model, including tree biomass and
-                    carbon storage for each tissues (stem, branch, leaf,
-                    root, and total tree)
+A list with class "output" containing three data.frame.
+   - `StemGrowth`: the estimated stem growth trends data for a target tree, including the tree age class and the corresponding growth data of diameter at breast height (DBH), stem height, and stem volume. More details on the output is \code{\link{r_StemGrowth}}
+   - `allomCarbon`: the estimated tree biomass and carbon storage data by using allometric models for a target tree, including tree biomass and carbon storage for each tissues (stem, branch, leaf, root, and total tree). More details on the output is \code{\link{r_allomCarbon}}
+   - `volumeCarbon`: the estimated tree biomass and carbon storage data by using volume model for a target tree, including tree biomass and carbon storage for each tissues (stem, aboveground, belowground, and total tree). More details on the output is \code{\link{r_volumeCarbon}}
 }
 \description{
 Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
+}
+\note{
+The \code{stemanalysis} was performed on individual trees
 }
 \examples{
 
 library(StemAnalysis)
 
 # Load the data sets
-data(stemdata)
-data(parameterdata)
+data(d_stem)
+data(d_BEF)
+data(d_parameters)
 
-# To calculating tree growth and carbon accumulation with input data sets
-stemanalysism(xtree = 8, stemdata = stemdata)
+# To calculating stem growth trends for an individual tree is needed
+stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
 
-# If the graph of stem growth profile and growth trends is needed
-stemanalysism(xtree = 8, stemgrowth = TRUE, treecarbon = TRUE,
-    stemdata = stemdata, parameterdata = parameterdata)
+# To calculating tree carbon storage by allometric models is needed
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
+             parameterdata = d_parameters)
+
+# To calculating tree carbon storage by volume model is needed
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
+             BEFdata = d_BEF)
+
+# To fitting the height-diameter relationships
+stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = d_stem)
 
 }
 \references{
