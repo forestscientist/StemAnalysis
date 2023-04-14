@@ -1,0 +1,382 @@
+\nonstopmode{}
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `StemAnalysis'}}
+\par\bigskip{\large \today}
+\end{center}
+\inputencoding{utf8}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdftitle = {StemAnalysis: Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data}}}{}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdfauthor = {Huili Wu; Wenhua Xiang}}}{}
+\begin{description}
+\raggedright{}
+\item[Type]\AsIs{Package}
+\item[Title]\AsIs{Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data}
+\item[Version]\AsIs{0.1.0}
+\item[Author]\AsIs{Huili Wu [aut, cre], Wenhua Xiang [aut]}
+\item[Maintainer]\AsIs{Huili Wu }\email{wuhuili0701@163.com}\AsIs{}
+\item[Description]\AsIs{Use stem analysis data to reconstructing tree growth and carbon accumulation. Users can independently or in combination perform a number of standard tasks for any tree species.
+(i) Age class determination.
+(ii) The cumulative growth, mean annual increment, and current annual increment of diameter at breast height (DBH) with bark, tree height, and stem volume with bark are estimated. 
+(iii) Tree biomass and carbon storage estimation from volume and allometric models are calculated. 
+(iv) Height-diameter relationship is fitted with nonlinear models, if diameter at breast height (DBH) or tree height are available, which can be used to retrieve tree height and diameter at breast height (DBH).
+<}\url{https://github.com/forestscientist/StemAnalysis}\AsIs{>.}
+\item[License]\AsIs{MIT + file LICENSE}
+\item[NeedsCompilation]\AsIs{no}
+\item[Repository]\AsIs{GitHub}
+\item[Encoding]\AsIs{UTF-8}
+\item[LazyData]\AsIs{true}
+\item[RoxygenNote]\AsIs{7.2.1}
+\item[Imports]\AsIs{lmfor (>= 1.0)}
+\item[Depends]\AsIs{R (>= 2.10)}
+\item[Suggests]\AsIs{knitr,
+rmarkdown,
+testthat (>= 3.0.0)}
+\item[Config/testthat/edition]\AsIs{3}
+\item[URL]\AsIs{}\url{https://github.com/forestscientist/StemAnalysis}\AsIs{}
+\item[VignetteBuilder]\AsIs{knitr}
+\end{description}
+\Rdcontents{\R{} topics documented:}
+\inputencoding{utf8}
+\HeaderA{allomCarbon}{Information about output\$allomCarbon dataframe}{allomCarbon}
+\keyword{datasets}{allomCarbon}
+%
+\begin{Description}\relax
+A dataframe containing the list of output variables and their description.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+allomCarbon
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 7 variables:
+\begin{description}
+
+\item[X] The growth ring number of the disc at ground
+\item[abovegroundB] The aboveground biomass of a sampled tree, kg
+\item[abovegroundC] The aboveground carbon storage of a sampled tree, kg
+\item[belowgroundB] The belowground biomass of a sampled tree, kg
+\item[belowgroundC] The belowground carbon storage of a sampled tree, kg
+\item[totalB] The total tree biomass of a sampled tree, kg
+\item[totalC] The total tree carbon storage of a sampled tree, kg
+\item[treeage] The age class of a tree growths, year
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(allomCarbon)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{allomPardata}{Information about input variables in parameters of allometric models}{allomPardata}
+\keyword{datasets}{allomPardata}
+%
+\begin{Description}\relax
+A dataset containing the list of input variables and their description.
+Note: If a user uses the StemAnalysis package to estimate a sampled tree
+carbon by allometric models, a parameters dataset should be provided.
+Owing the allometric model varies among tree species, the users should
+input the parameter data of the allometric models for the correspondingly
+tree species.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+allomPardata
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 3 rows and 7 variables:
+\begin{description}
+
+\item[Cconcentration] The carbon concentration in each tree tissues, kg C kg-1
+\item[DBH] The tree diameter of breast height, cm
+\item[X] The line number
+\item[a] The parameter a in the allometric model ln(B)=ln(a)+b×ln(DBH)+c×ln(H)
+\item[b] The parameter b in the allometric model ln(B)=ln(a)+b×ln(DBH)+c×ln(H)
+\item[c] The parameter c in the allometric model ln(B)=ln(a)+b×ln(DBH)+c×ln(H)
+\item[tissues] The tree tissues including aboveground and belowground
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(allomPardata)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{stemanalysism}{Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data}{stemanalysism}
+%
+\begin{Description}\relax
+Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+stemanalysism(
+  xtree,
+  stemgrowth = FALSE,
+  treecarbon = FALSE,
+  HDmodel = FALSE,
+  stemdata,
+  allompardata,
+  volumepardata
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{xtree}] Xtree is the tree number (Treeno), which is used to choose a target tree to be analyzed
+
+\item[\code{stemgrowth}] If stemgrowth is 'TRUE', stem growth profile and growth trends in terms of diameter at breast height (DBH), tree height, and stem volume will be showed in a graph. A example graph is man/Figures/StemGrowth.png
+
+\item[\code{treecarbon}] If treecarbon is 'TRUE', total tree biomass and carbon storage will be estimated by general allometric models (National Forestry and Grassland Administration, 2014) and volume model (Fang et al., 2001). The example graphs are man/Figures/TreeCarbon\_allometric.png and TreeCarbon\_volume. In addition, although treecarbon is 'TRUE', the estimation of tree biomass and carbon storage by allometric models will skip if 'allompardata' is missing, and the same is true for the estimation by volume model if 'volumepardata' is missing.
+
+\item[\code{HDmodel}] If HDmodel is 'TRUE', height-diameter relationship will be fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted results in a graph. A example graph is man/Figures/HDmodel.png
+
+\item[\code{stemdata}] table as described in \code{\LinkA{stemdata}{stemdata}} containing the information about stem analysis data.
+
+\item[\code{allompardata}] table as described in \code{\LinkA{allomPardata}{allomPardata}} containing the information about the parameter data of allometric models that can be optionally inputted by users
+
+\item[\code{volumepardata}] table as described in \code{\LinkA{volumePardata}{volumePardata}} containing the information about the biomass conversion factor data for volume model that can be optionally inputted by users
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list with class "output" containing three data.frame.
+- `StemGrowth`: the estimated stem growth trends data for a target tree, including the tree age class and the corresponding growth data of diameter at breast height (DBH), stem height, and stem volume. More details on the output is \code{\LinkA{StemGrowth}{StemGrowth}}
+- `allomCarbon`: the estimated tree biomass and carbon storage data by using allometric models for a target tree, including tree biomass and carbon storage for aboveground, belowground, and total tree. More details on the output is \code{\LinkA{allomCarbon}{allomCarbon}}
+- `volumeCarbon`: the estimated tree biomass and carbon storage data by using volume model for a target tree, including tree biomass and carbon storage for aboveground, belowground, and total tree. More details on the output is \code{\LinkA{volumeCarbon}{volumeCarbon}}
+\end{Value}
+%
+\begin{Note}\relax
+The \code{stemanalysis} was performed on individual trees
+\end{Note}
+%
+\begin{References}\relax
+Fang, J., Chen, A., Peng, C., et al. (2001)
+Changes in forest biomass carbon storage in China between 1949 and 1998.
+\emph{Science}
+\bold{292}, 2320-2322. doi:10.1126/science.1058629
+
+Mehtatalo, L. (2017)
+Lmfor: Functions for forest biometrics.
+https://CRAN.R-project.org/package=lmfor
+
+National Forestry and Grassland Administration. (2014) Tree biomass models and
+related parameters to carbon accounting for Cunninghamria lanceolata.
+\emph{Forestry industry standards of the People's Republic of China}
+Beijing, LY/T 2264—2014
+\end{References}
+%
+\begin{Examples}
+\begin{ExampleCode}
+
+library(StemAnalysis)
+
+# Load the data sets
+data(stemdata)
+data(volumePardata)
+data(allomPardata)
+
+# To calculating stem growth trends for an individual tree is needed
+stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = stemdata)
+
+# To calculating tree carbon storage by allometric models is needed
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata,
+             allompardata = allomPardata)
+
+# To calculating tree carbon storage by volume model is needed
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata,
+             volumepardata = volumePardata)
+
+# To fitting the height-diameter relationships
+stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = stemdata)
+
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{stemdata}{Information about input variables in stem analysis data}{stemdata}
+\keyword{datasets}{stemdata}
+%
+\begin{Description}\relax
+A dataset containing the list of input variables and their description.
+Note: If a user uses the StemAnalysis package to analysis a very big
+tree, the number of inner growth rings that diameter measured for some
+cross-sectional discs may be more than 11, the Dnobark12, Dnobark13, and
+much more variables can be added, which also could successfully run.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+stemdata
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 98 rows and 18 variables:
+\begin{description}
+
+\item[No] The line number
+\item[Treeno] The tree number for the sampled tree, the same number represents the same tree
+\item[TreeTH] Tree total height, m
+\item[stemheight] The stem height that the cross-sectional discs were obtained, m
+\item[stemage] The age namely the number of growth rings of the cross-sectional disc, year
+\item[Dwithbark] The maximum diameter of the cross-sectional disc with bark, cm
+\item[Dnobark0] The maximum diameter of the cross-sectional disc without bark, cm
+\item[Dnobark1] The diameter for the 1th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark2] The diameter for the 2th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark3] The diameter for the 3th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark4] The diameter for the 4th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark5] The diameter for the 5th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark6] The diameter for the 6th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark7] The diameter for the 7th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark8] The diameter for the 8th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark9] The diameter for the 9th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark10] The diameter for the 10th age class inner growth ring of the cross-sectional disc, cm
+\item[Dnobark11] The diameter for the 11th age class inner growth ring of the cross-sectional disc, cm
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(stemdata)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{StemGrowth}{Information about output\$StemGrowth dataframe}{StemGrowth}
+\keyword{datasets}{StemGrowth}
+%
+\begin{Description}\relax
+A dataframe containing the list of output variables and their description.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+StemGrowth
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 10 variables:
+\begin{description}
+
+\item[AnincreD] The mean annual increment of diameter at breast height, cm
+\item[AnincreH] The mean annual increment of tree height, m
+\item[AnincreV] The mean annual increment of tree stem volume, m3
+\item[AvincreD] The current annual increment of diameter at breast height, cm
+\item[AvincreH] The current annual increment of tree height, m
+\item[AvincreV] The current annual increment of tree stem volume, m3
+\item[DBHt] The tree diameter at breast height, cm
+\item[Height] The tree height, m
+\item[Volume] The tree stem volume, m3
+\item[X] The growth ring number of the disc at ground
+\item[stemdj] The age class of a tree growths, year
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(StemGrowth)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{volumeCarbon}{Information about output\$volumeCarbon dataframe}{volumeCarbon}
+\keyword{datasets}{volumeCarbon}
+%
+\begin{Description}\relax
+A dataframe containing the list of output variables and their description.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+volumeCarbon
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 9 variables:
+\begin{description}
+
+\item[BCF] The biomass conversion factor along age classes of a sampled tree, kg
+\item[RSR] The root-to-shoot ratio along age classes of a sampled tree, kg
+\item[X] The growth ring number of the disc at ground
+\item[abovegroundB] The aboveground biomass of a sampled tree, kg
+\item[abovegroundC] The aboveground carbon storage of a sampled tree, kg
+\item[belowgroundB] The belowground biomass of a sampled tree, kg
+\item[belowgroundC] The belowground carbon storage of a sampled tree, kg
+\item[totalB] The total tree biomass of a sampled tree, kg
+\item[totalC] The total tree carbon storage of a sampled tree, kg
+\item[treeage] The age class of a tree growths, year
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(volumeCarbon)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{volumePardata}{Information about input variables in biomass expansion factor for volume model}{volumePardata}
+\keyword{datasets}{volumePardata}
+%
+\begin{Description}\relax
+A dataset containing the list of input variables and their description.
+Note: If a user uses the StemAnalysis package to estimate a sampled tree
+carbon by volume model, a parameters dataset for the factors (BCF and RSR)
+should be provided. Owing the parameters of BCF and RSR vary among tree
+species, the users should input the parameters data for the
+correspondingly tree species
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+volumePardata
+\end{verbatim}
+\end{Usage}
+%
+\begin{Format}
+A data frame with 5 rows and 7 variables:
+\begin{description}
+
+\item[Cconcentration] The total tree carbon concentration, kg C kg-1
+\item[DBH] The tree diameter of breast height, cm
+\item[X] The line number
+\item[a] The parameter a in the estimation model of BCF (ln(BCF)=ln(a)+b×ln(DBH)+c×ln(H)) and RSR (ln(RSR)=ln(a)+b×ln(DBH)+c×ln(H))
+\item[b] The parameter b in the estimation model of BCF and RSR
+\item[c] The parameter c in the estimation model of BCF and RSR
+\item[factors] The tree biomass estimation factors including BCF and RSR
+
+\end{description}
+
+\end{Format}
+%
+\begin{Examples}
+\begin{ExampleCode}
+head(volumePardata)
+\end{ExampleCode}
+\end{Examples}
+\printindex{}
+\end{document}

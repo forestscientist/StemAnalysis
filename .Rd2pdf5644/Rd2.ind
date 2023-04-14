@@ -1,0 +1,33 @@
+\begin{theindex}
+
+  \item $*$ {\textbf  {datasets}}
+    \subitem \texttt  {allomCarbon}, \hyperpage{2}
+    \subitem \texttt  {allomPardata}, \hyperpage{3}
+    \subitem \texttt  {stemdata}, \hyperpage{5}
+    \subitem \texttt  {StemGrowth}, \hyperpage{6}
+    \subitem \texttt  {volumeCarbon}, \hyperpage{7}
+    \subitem \texttt  {volumePardata}, \hyperpage{7}
+
+  \indexspace
+
+  \item \texttt  {allomCarbon}, \hyperpage{2}, 
+		\hyperindexformat{\textit}{4}
+  \item \texttt  {allomPardata}, \hyperpage{3}, 
+		\hyperindexformat{\textit}{4}
+
+  \indexspace
+
+  \item \texttt  {stemanalysism}, \hyperpage{3}
+  \item \texttt  {stemdata}, \hyperindexformat{\textit}{4}, 
+		\hyperpage{5}
+  \item \texttt  {StemGrowth}, \hyperindexformat{\textit}{4}, 
+		\hyperpage{6}
+
+  \indexspace
+
+  \item \texttt  {volumeCarbon}, \hyperindexformat{\textit}{4}, 
+		\hyperpage{7}
+  \item \texttt  {volumePardata}, \hyperindexformat{\textit}{4}, 
+		\hyperpage{7}
+
+\end{theindex}

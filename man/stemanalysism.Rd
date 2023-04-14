@@ -10,8 +10,8 @@ stemanalysism(
   treecarbon = FALSE,
   HDmodel = FALSE,
   stemdata,
-  parameterdata,
-  BEFdata
+  allompardata,
+  volumepardata
 )
 }
 \arguments{
@@ -19,21 +19,21 @@ stemanalysism(
 
 \item{stemgrowth}{If stemgrowth is 'TRUE', stem growth profile and growth trends in terms of diameter at breast height (DBH), tree height, and stem volume will be showed in a graph. A example graph is man/Figures/StemGrowth.png}
 
-\item{treecarbon}{If treecarbon is 'TRUE', total tree biomass and carbon storage will be estimated by allometric models (Xiang et al., 2021) and volume model (IPCC, 2003). The example graphs are man/Figures/TreeCarbon_allometric.png and TreeCarbon_volume. In addition, although treecarbon is 'TRUE', the estimation of tree biomass and carbon storage by allometric models will skip if 'parameterdata' is missing, and the same is true for the estimation by volume model if 'BEFdata' is missing.}
+\item{treecarbon}{If treecarbon is 'TRUE', total tree biomass and carbon storage will be estimated by general allometric models (National Forestry and Grassland Administration, 2014) and volume model (Fang et al., 2001). The example graphs are man/Figures/TreeCarbon_allometric.png and TreeCarbon_volume. In addition, although treecarbon is 'TRUE', the estimation of tree biomass and carbon storage by allometric models will skip if 'allompardata' is missing, and the same is true for the estimation by volume model if 'volumepardata' is missing.}
 
 \item{HDmodel}{If HDmodel is 'TRUE', height-diameter relationship will be fitted with nonlinear models (Mehtatalo, 2017) and showed the fitted results in a graph. A example graph is man/Figures/HDmodel.png}
 
-\item{stemdata}{table as described in \code{\link{d_stem}} containing the information about stem analysis data.}
+\item{stemdata}{table as described in \code{\link{stemdata}} containing the information about stem analysis data.}
 
-\item{parameterdata}{table as described in \code{\link{d_parameters}} containing the information about the parameter data of allometric models that can be optionally inputted by users}
+\item{allompardata}{table as described in \code{\link{allomPardata}} containing the information about the parameter data of allometric models that can be optionally inputted by users}
 
-\item{BEFdata}{table as described in \code{\link{d_BEF}} containing the information about the biomass expansion factor data for volume model that can be optionally inputted by users}
+\item{volumepardata}{table as described in \code{\link{volumePardata}} containing the information about the biomass conversion factor data for volume model that can be optionally inputted by users}
 }
 \value{
 A list with class "output" containing three data.frame.
-   - `StemGrowth`: the estimated stem growth trends data for a target tree, including the tree age class and the corresponding growth data of diameter at breast height (DBH), stem height, and stem volume. More details on the output is \code{\link{r_StemGrowth}}
-   - `allomCarbon`: the estimated tree biomass and carbon storage data by using allometric models for a target tree, including tree biomass and carbon storage for each tissues (stem, branch, leaf, root, and total tree). More details on the output is \code{\link{r_allomCarbon}}
-   - `volumeCarbon`: the estimated tree biomass and carbon storage data by using volume model for a target tree, including tree biomass and carbon storage for each tissues (stem, aboveground, belowground, and total tree). More details on the output is \code{\link{r_volumeCarbon}}
+   - `StemGrowth`: the estimated stem growth trends data for a target tree, including the tree age class and the corresponding growth data of diameter at breast height (DBH), stem height, and stem volume. More details on the output is \code{\link{StemGrowth}}
+   - `allomCarbon`: the estimated tree biomass and carbon storage data by using allometric models for a target tree, including tree biomass and carbon storage for aboveground, belowground, and total tree. More details on the output is \code{\link{allomCarbon}}
+   - `volumeCarbon`: the estimated tree biomass and carbon storage data by using volume model for a target tree, including tree biomass and carbon storage for aboveground, belowground, and total tree. More details on the output is \code{\link{volumeCarbon}}
 }
 \description{
 Reconstructing Tree Growth and Carbon Accumulation with Stem Analysis Data
@@ -46,23 +46,23 @@ The \code{stemanalysis} was performed on individual trees
 library(StemAnalysis)
 
 # Load the data sets
-data(d_stem)
-data(d_BEF)
-data(d_parameters)
+data(stemdata)
+data(volumePardata)
+data(allomPardata)
 
 # To calculating stem growth trends for an individual tree is needed
-stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = d_stem)
+stemanalysism(xtree = 8, stemgrowth = TRUE, stemdata = stemdata)
 
 # To calculating tree carbon storage by allometric models is needed
-stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
-             parameterdata = d_parameters)
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata,
+             allompardata = allomPardata)
 
 # To calculating tree carbon storage by volume model is needed
-stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = d_stem,
-             BEFdata = d_BEF)
+stemanalysism(xtree = 8, treecarbon = TRUE, stemdata = stemdata,
+             volumepardata = volumePardata)
 
 # To fitting the height-diameter relationships
-stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = d_stem)
+stemanalysism(xtree = 8, HDmodel = TRUE, stemdata = stemdata)
 
 }
 \references{
@@ -75,9 +75,8 @@ Mehtatalo, L. (2017)
 Lmfor: Functions for forest biometrics.
 {https://CRAN.R-project.org/package=lmfor}
 
-Xiang, W.H., Li, L.H., Ouyang, S., et al. (2021)
-Effects of stand age on tree biomass partitioning and allometric equations
-    in Chinese fir (Cunninghamia lanceolata) plantations.
-\emph{European Journal of Forest Research}
-\bold{140}, 317-332. {doi:10.1007/s10342-020-01333-0}
+National Forestry and Grassland Administration. (2014) Tree biomass models and
+related parameters to carbon accounting for Cunninghamria lanceolata.
+\emph{Forestry industry standards of the People's Republic of China}
+{Beijing, LY/T 2264—2014}
 }

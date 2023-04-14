@@ -9,7 +9,7 @@
 #' @format A data frame with 98 rows and 18 variables:
 #' \describe{
 #'   \item{No}{The line number}
-#'   \item{Treeno}{The tree number for the sampled tree}
+#'   \item{Treeno}{The tree number for the sampled tree, the same number represents the same tree}
 #'   \item{TreeTH}{Tree total height, m}
 #'   \item{stemheight}{The stem height that the cross-sectional discs were obtained, m}
 #'   \item{stemage}{The age namely the number of growth rings of the cross-sectional disc, year}
@@ -29,5 +29,5 @@
 #' }
 
 #' @examples
-#' head(d_stem)
-"d_stem"
+#' head(stemdata)
+"stemdata"
